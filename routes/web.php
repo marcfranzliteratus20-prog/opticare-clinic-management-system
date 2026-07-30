@@ -154,3 +154,8 @@ Route::middleware('check.login')->group(function () {
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     });
 });
+
+Route::get('/fix-db', function () {
+    \Artisan::call('migrate', ['--force' => true]);
+    return 'Database migration successful!';
+});
