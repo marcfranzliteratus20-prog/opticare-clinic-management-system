@@ -22,10 +22,11 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Configure Nginx
 COPY nginx.conf /etc/nginx/sites-available/default
 
-# Fix file permissions for storage, cache, and system tmp directory
-RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /tmp
+# Set proper permissions for storage and cache directories
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
-# Run migrations, clear/cache config, and start Nginx & PHP-FPM
-CMD ["sh", "-c", "php artisan migrate --force && php artisan config:clear && php artisan view:clear && nginx -g 'daemon off;' & php-fpm"]
+# Run migrations, optimize cache, and start services
+CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && nginx -g 'daemon off;' & php-fpm"]
