@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies (Nginx ay ginawang lowercase)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev nginx
 
@@ -24,5 +24,5 @@ COPY nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 80
 
-# Auto run database migration & start servers
-CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && nginx -g 'daemon off;' & php-fpm"]
+# Run migrations and start Nginx & PHP-FPM cleanly using sh
+CMD ["sh", "-c", "php artisan migrate --force && nginx -g 'daemon off;' & php-fpm"]
