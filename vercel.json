@@ -1,14 +1,6 @@
 {
   "version": 2,
-  "functions": {
-    "public/index.php": {
-      "runtime": "vercel-php@0.7.3"
-    }
-  },
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "public/index.php"
-    }
-  ]
+  "framework": null,
+  "buildCommand": "composer install --no-dev",
+  "outputDirectory": "public"
 }
