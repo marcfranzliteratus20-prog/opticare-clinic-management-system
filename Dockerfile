@@ -25,4 +25,4 @@ COPY nginx.conf /etc/nginx/sites-available/default
 EXPOSE 80
 
 # Auto run database migration & start servers
-CMD php artisan migrate --force && php artisan config:cache && php artisan route:cache && nginx -g "daemon off;" & php-fpm
+CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && nginx -g 'daemon off;' & php-fpm"]
