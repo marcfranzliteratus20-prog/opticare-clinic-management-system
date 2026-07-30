@@ -1,24 +1,20 @@
-<?php
+namespace App\Providers;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\CheckRole;
-use App\Http\Middleware\CheckLogin;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
-        health: '/up',
-    )
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'role' => CheckRole::class,
-            'check.login' => CheckLogin::class,
-        ]);
-    })
-    ->withExceptions(function (Exceptions $exceptions) {
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
         //
-    })
-    ->create();
+    }
+
+    public function boot(): void
+    {
+        // I-force ang HTTPS kung nasa production / Render environment
+        if (config('app.env') === 'production' || app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+    }
+}
