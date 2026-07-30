@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Artisan;
+use App\Models\User;
 
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DashboardController;
@@ -34,9 +38,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ONLINE BOOKING -- no login required. Patients book their own
-| appointment; it lands in the normal Appointments module as "Pending"
-| with source = 'Online' so staff can tell it apart from staff-encoded ones.
+| PUBLIC ONLINE BOOKING -- no login required.
 |--------------------------------------------------------------------------
 */
 Route::get('/book-appointment', [BookingController::class, 'create'])->name('booking.create');
@@ -44,7 +46,7 @@ Route::post('/book-appointment', [BookingController::class, 'store'])->name('boo
 
 Route::get('/check-status', [BookingController::class, 'showStatusForm'])->name('booking.status.form');
 Route::post('/check-status', [BookingController::class, 'checkStatus'])
-    ->middleware('throttle:10,1') // limit lookups so this can't be used to brute-force contact numbers
+    ->middleware('throttle:10,1')
     ->name('booking.status');
 
 /*
@@ -52,18 +54,12 @@ Route::post('/check-status', [BookingController::class, 'checkStatus'])
 | AUTHENTICATION ROUTES
 |--------------------------------------------------------------------------
 */
-
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-// FIX: throttle login attempts (5 per minute per IP+email combo) to slow
-// down brute-force password guessing.
 Route::post('/login', [LoginController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
 
-// FIX: logout as POST, matching the CSRF-protected form used in
-// layouts.app / layouts.staff (a GET link would let logout be
-// triggered by link prefetching or a stray <img>/CSRF-less request).
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 /*
@@ -71,7 +67,6 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 | PROTECTED ROUTES
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('check.login')->group(function () {
 
     /*
@@ -155,32 +150,50 @@ Route::middleware('check.login')->group(function () {
     });
 });
 
-Route::get('/fix-db', function () {
-    \Artisan::call('migrate', ['--force' => true]);
-    return 'Database migration successful!';
-});
-
+/*
+|--------------------------------------------------------------------------
+| TEMPORARY SETUP & MIGRATION HELPER ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::get('/run-migration', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Database Migration Completed Successfully!';
 });
 
-Route::get('/run-migration', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrations done!';
-});
-
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-
 Route::get('/setup-admin', function () {
     $user = User::updateOrCreate(
         ['email' => 'marcfranz2004@gmail.com'],
         [
-            'name' => 'Admin',
-            'password' => Hash::make('admin12345'), // Ito ang gagamitin mong password
+            'name' => 'Admin User',
+            'password' => Hash::make('admin12345'),
+            'role' => 'Admin', // Naka-capital "A" para sa role:Admin middleware
+            'email_verified_at' => now(),
         ]
     );
 
-    return 'SUCCESS! Pwede ka na mag-login sa https://opticare-clinic-management-system.onrender.com/login gamit ang email: marcfranz2004@gmail.com at password: admin12345';
+    // Kina-catches din sa session para sa custom `check.login` middleware
+    session([
+        'user' => $user,
+        'user_role' => 'Admin'
+    ]);
+
+    return 'SUCCESS! Admin user created or updated. You can now log in at /login with: marcfranz2004@gmail.com / admin12345';
+});
+
+Route::get('/force-login', function () {
+    $user = User::where('email', 'marcfranz2004@gmail.com')->first();
+    
+    if (!$user) {
+        return 'Wala pang user na ganyan sa database! I-run muna ang /setup-admin';
+    }
+
+    Auth::login($user);
+
+    // Sine-set ang session na ginagamit sa root / check.login middleware
+    session([
+        'user' => $user,
+        'user_role' => $user->role ?? 'Admin'
+    ]);
+
+    return redirect()->route('dashboard');
 });
