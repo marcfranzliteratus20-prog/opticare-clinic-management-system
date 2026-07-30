@@ -164,3 +164,23 @@ Route::get('/run-migration', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Database Migration Completed Successfully!';
 });
+
+Route::get('/run-migration', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations done!';
+});
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+Route::get('/setup-admin', function () {
+    $user = User::updateOrCreate(
+        ['email' => 'marcfranz2004@gmail.com'],
+        [
+            'name' => 'Admin',
+            'password' => Hash::make('admin12345'), // Ito ang gagamitin mong password
+        ]
+    );
+
+    return 'SUCCESS! Pwede ka na mag-login sa https://opticare-clinic-management-system.onrender.com/login gamit ang email: marcfranz2004@gmail.com at password: admin12345';
+});
