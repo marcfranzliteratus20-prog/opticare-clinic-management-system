@@ -159,3 +159,8 @@ Route::get('/fix-db', function () {
     \Artisan::call('migrate', ['--force' => true]);
     return 'Database migration successful!';
 });
+
+Route::get('/run-migration', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Database Migration Completed Successfully!';
+});

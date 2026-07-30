@@ -12,9 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         
-        // DITO MO IRE-REGISTER ANG MIDDLEWARE ALIAS MO
+        // Dito inirerehistro ang mga middleware aliases para sa Laravel 11/12
         $middleware->alias([
-            'check.login' => \App\Http\Middleware\CheckLogin::class, // Siguraduhing tama ang class path ng middleware mo
+            'check.login' => \App\Http\Middleware\CheckLogin::class,
+            'role'        => \App\Http\Middleware\CheckRole::class, // Gamit ang iyong custom CheckRole middleware
         ]);
 
     })

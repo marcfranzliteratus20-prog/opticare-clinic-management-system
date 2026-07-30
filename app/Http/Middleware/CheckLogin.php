@@ -8,11 +8,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckLogin
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('user')) {
-            // Small UX improvement: let the login page explain why the
-            // user was sent there, instead of a silent redirect.
+        if (!auth()->check()) {
             return redirect('/login')->with('error', 'Please log in to continue.');
         }
 
