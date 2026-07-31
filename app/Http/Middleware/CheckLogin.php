@@ -4,15 +4,15 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckLogin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('user')) {
-            // Small UX improvement: let the login page explain why the
-            // user was sent there, instead of a silent redirect.
+        // Tinitingnan kapag may NAKALOGIN na user sa Auth o sa Custom Session
+        if (!Auth::check() && !session()->has('user')) {
             return redirect('/login')->with('error', 'Please log in to continue.');
         }
 

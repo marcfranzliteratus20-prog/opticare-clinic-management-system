@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -18,48 +18,36 @@ class LoginController extends Controller
     // Handle login attempt
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
+        $credentials = $request->validate([
+            'email'    => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Hanapin ang user gamit ang TRIM at Case-Insensitive email search
-        $user = User::whereRaw('LOWER(trim(email)) = ?', [strtolower(trim($request->email))])->first();
+        // Subukang i-authenticate ang credentials
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
 
-        // Pag walang nahanap sa email, kuhanin ang kauna-unahang user sa DB (Bypass test)
-        if (!$user) {
-            $user = User::first();
+            $user = Auth::user();
+            $role = strtolower(trim($user->role ?? 'admin'));
+
+            // I-set ang session values na kailangan ng iyong CheckLogin at CheckRole middleware
+            session([
+                'user'      => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $role,
+            ]);
+
+            $request->session()->save();
+
+            // Redirect batay sa role
+            if ($role === 'admin') {
+                return redirect('/admin');
+            }
+
+            return redirect('/dashboard');
         }
 
-        if (!$user) {
-            return back()->withInput($request->only('email'))->with('error', 'Walang account sa database.');
-        }
-
-        // FORCE LOGIN SA LARAVEL AUTH SYSTEM
-        Auth::login($user);
-
-        // REGENERATE SESSION ID
-        $request->session()->regenerate();
-
-        $role = strtolower(trim($user->role ?? 'admin'));
-
-        // SAVE CUSTOM SESSIONS
-        session([
-            'user'      => $user->id,
-            'user_name' => $user->name,
-            'user_role' => $role,
-        ]);
-
-        // FORCE SAVE SESSION
-        $request->session()->save();
-
-        // FIX: DIRECT TO DASHBOARD ROUTE DIRECTLY
-        // Kung admin ang role, papasok sa '/admin', kung iba naman, sa '/dashboard'
-        if ($role === 'admin') {
-            return redirect('/admin');
-        }
-
-        return redirect('/dashboard');
+        return back()->withInput($request->only('email'))->with('error', 'Invalid email or password.');
     }
 
     // Handle logout
