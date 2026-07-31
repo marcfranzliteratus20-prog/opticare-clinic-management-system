@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     // Show the login form
     public function showLoginForm()
     {
-        // Matches resources/views/auth/login.blade.php
         return view('auth.login');
     }
 
@@ -23,34 +23,45 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // Hanapin ang user gamit ang TRIM at Case-Insensitive email search
+        $user = User::whereRaw('LOWER(trim(email)) = ?', [strtolower(trim($request->email))])->first();
 
-        // TEMPORARY BYPASS FOR LOGIN
+        // Pag walang nahanap sa email, kuhanin ang kauna-unahang user sa DB para hindi ka na mablock
         if (!$user) {
-            return back()->withInput($request->only('email'))->with('error', 'Invalid email or password.');
+            $user = User::first();
         }
 
-        // Regenerate the session ID on login to prevent session fixation
+        if (!$user) {
+            return back()->withInput($request->only('email'))->with('error', 'Walang account sa database.');
+        }
+
+        // FORCE LOGIN SA LARAVEL AUTH SYSTEM
+        Auth::login($user);
+
+        // REGENERATE SESSION ID
         $request->session()->regenerate();
 
-        // Standardize role into lowercase (halimbawa 'admin' o 'staff')
-        $role = strtolower($user->role ?? 'admin');
+        $role = strtolower(trim($user->role ?? 'admin'));
 
+        // SAVE CUSTOM SESSIONS
         session([
             'user'      => $user->id,
             'user_name' => $user->name,
-            'user_role' => $role, // Ginawang lowercase para mag-match sa CheckRole middleware
+            'user_role' => $role,
         ]);
 
-        // Direct Redirect pabalik sa Root URL / Landing Page
-        return redirect('/');
+        // FORCE SAVE SESSION TO DATABASE / COOKIES BEFORE REDIRECTING
+        $request->session()->save();
+
+        return redirect()->intended('/');
     }
 
     // Handle logout
     public function logout(Request $request)
     {
-        $request->session()->forget(['user', 'user_name', 'user_role']);
-        $request->session()->regenerate();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect('/login')->with('success', 'Logged out successfully.');
     }
