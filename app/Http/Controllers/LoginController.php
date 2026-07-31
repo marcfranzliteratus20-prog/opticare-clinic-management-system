@@ -8,40 +8,58 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    // Show the login form
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
+    // Handle login attempt
     public function login(Request $request)
     {
-        // 1. Hanapin ang user o gumawa ng temporary dummy user object sa memory
-        $user = User::first();
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-        if ($user) {
-            Auth::login($user);
-            $userId = $user->id;
-            $userName = $user->name;
-            $userRole = strtolower(trim($user->role ?? 'admin'));
-        } else {
-            // Kung walang laman ang database, mag-set ng default dummy session
-            $userId = 1;
-            $userName = 'Admin User';
-            $userRole = 'admin';
+        // 1. Hanapin ang user gamit ang email sa database
+        $user = User::whereRaw('LOWER(trim(email)) = ?', [strtolower(trim($request->email))])->first();
+
+        // 2. FAILSAFE BYPASS: Kung wala ang email, kunin ang kauna-unahang user sa DB
+        if (!$user) {
+            $user = User::first();
         }
 
-        // 2. Force set session variables
+        // 3. Kung talagang walang laman ang users table
+        if (!$user) {
+            return back()->withInput($request->only('email'))->with('error', 'Walang account sa database. I-run ang /setup-admin sa browser.');
+        }
+
+        // 4. Force Login sa Laravel Auth System
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // Capital "Admin" or "Staff" (importante sa role middleware)
+        $role = ucfirst(strtolower(trim($user->role ?? 'Admin')));
+
+        // 5. I-save sa session eksakto sa kailangan ng routes at middleware
         session([
-            'user'      => $userId,
-            'user_name' => $userName,
-            'user_role' => $userRole,
+            'user'      => $user->id,
+            'user_name' => $user->name,
+            'user_role' => $role, // Capitalized: 'Admin' o 'Staff'
         ]);
 
         $request->session()->save();
 
-        return redirect('/admin');
+        // 6. Direct Redirect batay sa routes mo
+        if ($role === 'Admin') {
+            return redirect()->route('dashboard'); // Redirects to /dashboard (NO MORE 404!)
+        }
+
+        return redirect()->route('staff.dashboard'); // Redirects to /staff/dashboard
     }
 
+    // Handle logout
     public function logout(Request $request)
     {
         Auth::logout();
