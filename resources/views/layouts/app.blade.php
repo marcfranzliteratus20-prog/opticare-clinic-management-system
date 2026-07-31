@@ -30,6 +30,13 @@
             margin: 0;
         }
 
+        /* PAGINATION ARROWS SIZE FIX */
+        .pagination svg, 
+        nav svg {
+            width: 16px !important;
+            height: 16px !important;
+        }
+
         /* TOP BAR */
         .topbar {
             height: 70px;
@@ -279,7 +286,7 @@
 
             <!-- NOTIFICATION -->
             <div class="dropdown">
-                <a href="#" class="topbar-icon-btn" data-bs-toggle="dropdown">
+                <a href="#" class="topbar-icon-btn d-flex align-items-center" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-bell-fill"></i>
                     @if(($totalNotifications ?? 0) > 0)
                         <span class="badge rounded-pill" style="position: absolute; top: -6px; right: -8px;">
@@ -288,21 +295,21 @@
                     @endif
                 </a>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="notificationDropdown">
                     <li class="dropdown-header fw-bold">Notifications</li>
-                    <li><a class="dropdown-item" href="{{ route('appointments.index') }}">📅 {{ $todayAppointments }} Appointments</a></li>
-                    <li><a class="dropdown-item" href="{{ route('inventory.index') }}">⚠️ {{ $lowStock }} Low Stock</a></li>
-                    <li><a class="dropdown-item" href="{{ route('billing.index') }}">💳 {{ $unpaidBilling }} Unpaid</a></li>
+                    <li><a class="dropdown-item" href="{{ route('appointments.index') }}">📅 {{ $todayAppointments ?? 0 }} Appointments</a></li>
+                    <li><a class="dropdown-item" href="{{ route('inventory.index') }}">⚠️ {{ $lowStock ?? 0 }} Low Stock</a></li>
+                    <li><a class="dropdown-item" href="{{ route('billing.index') }}">💳 {{ $unpaidBilling ?? 0 }} Unpaid</a></li>
                 </ul>
             </div>
 
             <!-- ADMIN -->
             <div class="dropdown">
-                <a href="#" class="topbar-avatar" data-bs-toggle="dropdown">
+                <a href="#" class="topbar-avatar" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     {{ strtoupper(substr(session('user_name', 'A'), 0, 1)) }}
                 </a>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="userDropdown">
                     <li class="dropdown-header">{{ session('user_name', 'Admin') }}</li>
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Account Settings</a></li>
                     <li><hr class="dropdown-divider"></li>
@@ -341,20 +348,24 @@
             <i class="bi bi-calendar-check me-2"></i>
             Appointments
 
-            <span class="badge bg-warning text-dark ms-auto me-1">
-                {{ $pendingAppointments }}
-            </span>
+            @if(($pendingAppointments ?? 0) > 0)
+                <span class="badge bg-warning text-dark ms-auto me-1">
+                    {{ $pendingAppointments }}
+                </span>
+            @endif
 
-            <span class="badge bg-success">
-                {{ $completedAppointments }}
-            </span>
+            @if(($completedAppointments ?? 0) > 0)
+                <span class="badge bg-success">
+                    {{ $completedAppointments }}
+                </span>
+            @endif
         </a>
 
         <a href="{{ route('billing.index') }}" class="sidebar-link {{ request()->routeIs('billing.*') ? 'active' : '' }}">
             <i class="bi bi-receipt me-2"></i>
             Billing
 
-            @if($unpaidBilling > 0)
+            @if(($unpaidBilling ?? 0) > 0)
                 <span class="badge bg-danger ms-auto">
                     {{ $unpaidBilling }}
                 </span>
@@ -365,7 +376,7 @@
             <i class="bi bi-box-seam me-2"></i>
             Inventory
 
-            @if($lowStock > 0)
+            @if(($lowStock ?? 0) > 0)
                 <span class="badge bg-danger ms-auto">
                     {{ $lowStock }}
                 </span>

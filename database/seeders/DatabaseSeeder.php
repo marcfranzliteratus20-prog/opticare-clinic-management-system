@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Gumawa o mag-update ng Admin Account
+        User::updateOrCreate(
+            ['email' => 'admin@opticare.com'], // Hanapin kung may ganitong email
+            [
+                'name'     => 'OptiCare Admin',
+                'email'    => 'admin@opticare.com',
+                'password' => Hash::make('admin123'), // Bagong password mo
+            ]
+        );
     }
 }
