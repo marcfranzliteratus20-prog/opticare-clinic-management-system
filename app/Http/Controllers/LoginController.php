@@ -26,7 +26,7 @@ class LoginController extends Controller
         // Hanapin ang user gamit ang TRIM at Case-Insensitive email search
         $user = User::whereRaw('LOWER(trim(email)) = ?', [strtolower(trim($request->email))])->first();
 
-        // Pag walang nahanap sa email, kuhanin ang kauna-unahang user sa DB para hindi ka na mablock
+        // Pag walang nahanap sa email, kuhanin ang kauna-unahang user sa DB (Bypass test)
         if (!$user) {
             $user = User::first();
         }
@@ -50,10 +50,16 @@ class LoginController extends Controller
             'user_role' => $role,
         ]);
 
-        // FORCE SAVE SESSION TO DATABASE / COOKIES BEFORE REDIRECTING
+        // FORCE SAVE SESSION
         $request->session()->save();
 
-        return redirect()->intended('/');
+        // FIX: DIRECT TO DASHBOARD ROUTE DIRECTLY
+        // Kung admin ang role, papasok sa '/admin', kung iba naman, sa '/dashboard'
+        if ($role === 'admin') {
+            return redirect('/admin');
+        }
+
+        return redirect('/dashboard');
     }
 
     // Handle logout
