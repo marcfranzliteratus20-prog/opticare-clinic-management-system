@@ -47,15 +47,12 @@ class BackupController extends Controller
         $command = $driver === 'pgsql'
             ? $this->buildPgDumpCommand($fullPath)
             : $this->buildMysqldumpCommand($fullPath);
-
-       exec('which pg_dump', $whichOutput, $whichCode);
+exec($command, $output, $resultCode);
 
 dd([
-    'pg_dump_path' => $whichOutput,
-    'which_code' => $whichCode,
-    'command' => $command,
+    'resultCode' => $resultCode,
+    'output' => $output,
 ]);
-
         if ($resultCode !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
             // Clean up an empty/failed file so it doesn't clutter the list
             if (file_exists($fullPath)) {
