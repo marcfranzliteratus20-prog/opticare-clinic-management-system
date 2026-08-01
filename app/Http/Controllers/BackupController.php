@@ -18,7 +18,7 @@ class BackupController extends Controller
             ->map(function ($file) {
                 return [
                     'name' => basename($file),
-                    'size' => round(Storage::disk('local')->size($file) / 1024, 1), // KB
+                    'size' => round(Storage::disk('local')->size($file) / 1024, 1),
                     'date' => Storage::disk('local')->lastModified($file),
                 ];
             })
@@ -34,85 +34,72 @@ class BackupController extends Controller
         $disk->makeDirectory(self::BACKUP_DIR);
 
         $filename = 'opticare-backup-' . now()->format('Y-m-d_His') . '.sql';
-
-        // FIX: use the disk's own path() resolver instead of manually
-        // building storage_path('app/...') -- in Laravel 11+, the 'local'
-        // disk's root moved to storage/app/private, so hardcoding
-        // storage_path('app/...') pointed to the wrong folder and made
-        // download()/exists() unable to find the file.
         $fullPath = $disk->path(self::BACKUP_DIR . '/' . $filename);
 
         $driver = DB::connection()->getDriverName();
 
-        $command = $driver === 'pgsql'
-            ? $this->buildPgDumpCommand($fullPath)
-            : $this->buildMysqldumpCommand($fullPath);
-exec($command, $output, $resultCode);
+        if ($driver === 'pgsql') {
+            $command = $this->buildPgDumpCommand($fullPath);
+        } else {
+            $command = $this->buildMysqldumpCommand($fullPath);
+        }
 
-dd([
-    'command' => $command,
-    'resultCode' => $resultCode,
-    'output' => $output,
-    'error' => shell_exec($command . ' 2>&1'),
-]);
+        exec($command . ' 2>&1', $output, $resultCode);
+
         if ($resultCode !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
-            // Clean up an empty/failed file so it doesn't clutter the list
+
             if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
 
-            $tool = $driver === 'pgsql' ? 'pg_dump' : 'mysqldump';
-
             return back()->with(
                 'error',
-                "Backup failed. Make sure {$tool} is installed and accessible on this server."
+                implode("\n", $output)
             );
         }
 
-        return back()->with('success', 'Backup created successfully: ' . $filename);
+        return back()->with(
+            'success',
+            'Backup created successfully: ' . $filename
+        );
     }
 
     /**
-     * Backup command for MySQL/MariaDB (local XAMPP setup).
+     * MySQL Backup
      */
-   private function buildPgDumpCommand(string $fullPath): string
-{
-    $db = config('database.connections.pgsql');
+    private function buildMysqldumpCommand(string $fullPath): string
+    {
+        $db = config('database.connections.mysql');
 
-    putenv("PGPASSWORD={$db['password']}");
+        $mysqldump = env('MYSQLDUMP_PATH', 'mysqldump');
 
-    $pgDumpPath = env('PGDUMP_PATH', '/usr/bin/pg_dump');
+        return sprintf(
+            '%s --user=%s --password=%s --host=%s %s > %s',
+            escapeshellcmd($mysqldump),
+            escapeshellarg($db['username']),
+            escapeshellarg($db['password']),
+            escapeshellarg($db['host']),
+            escapeshellarg($db['database']),
+            escapeshellarg($fullPath)
+        );
+    }
 
-    return sprintf(
-        '%s -h %s -p %s -U %s -F p -d %s -f %s',
-        $pgDumpPath,
-        $db['host'],
-        $db['port'],
-        $db['username'],
-        $db['database'],
-        $fullPath
-    );
-}
     /**
-     * Backup command for PostgreSQL (Render deployment).
+     * PostgreSQL Backup
      */
     private function buildPgDumpCommand(string $fullPath): string
     {
         $db = config('database.connections.pgsql');
 
-        // pg_dump doesn't accept a plaintext --password flag the way
-        // mysqldump does -- the standard way to pass it non-interactively
-        // is the PGPASSWORD environment variable.
-        putenv('PGPASSWORD=' . $db['password']);
+        putenv("PGPASSWORD={$db['password']}");
 
-        // Set PGDUMP_PATH in .env if pg_dump isn't on the server's PATH.
-   $pgDumpPath = env('PGDUMP_PATH', '/usr/bin/pg_dump');
+        $pgDump = env('PGDUMP_PATH', '/usr/bin/pg_dump');
 
         return sprintf(
-            '%s --host=%s --port=%s --username=%s --no-password --format=plain %s > %s 2>&1',
-            escapeshellarg($pgDumpPath),
+            '%s -h %s -p %s -U %s -F p -d %s -f %s',
+            escapeshellcmd($pgDump),
             escapeshellarg($db['host']),
-            escapeshellarg($db['port'] ?? 5432),
+            escapeshellarg($db['port']),
             escapeshellarg($db['username']),
             escapeshellarg($db['database']),
             escapeshellarg($fullPath)
@@ -133,7 +120,10 @@ dd([
     public function destroy(string $filename)
     {
         $path = self::BACKUP_DIR . '/' . basename($filename);
-        Storage::disk('local')->delete($path);
+
+        if (Storage::disk('local')->exists($path)) {
+            Storage::disk('local')->delete($path);
+        }
 
         return back()->with('success', 'Backup file deleted.');
     }
