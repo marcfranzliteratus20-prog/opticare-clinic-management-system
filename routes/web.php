@@ -103,10 +103,40 @@ Route::middleware('check.login')->group(function () {
         Route::put('/archive/{type}/{id}/restore', [ArchiveController::class, 'restore'])->name('archive.restore');
         Route::delete('/archive/{type}/{id}/force', [ArchiveController::class, 'forceDelete'])->name('archive.force');
 
-        Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
-        Route::post('/backup', [BackupController::class, 'create'])->name('backup.create');
-        Route::get('/backup/{filename}/download', [BackupController::class, 'download'])->name('backup.download');
-        Route::delete('/backup/{filename}', [BackupController::class, 'destroy'])->name('backup.destroy');
+      // =============================
+// DATABASE BACKUP
+// =============================
+Route::get('/backup', [BackupController::class, 'index'])
+    ->name('backup.index');
+
+Route::post('/backup/create', [BackupController::class, 'create'])
+    ->name('backup.create');
+
+Route::get('/backup/download/{filename}', [BackupController::class, 'download'])
+    ->name('backup.download');
+
+Route::delete('/backup/delete/{filename}', [BackupController::class, 'destroy'])
+    ->name('backup.destroy');
+
+
+// =============================
+// RESTORE DATABASE
+// =============================
+Route::get('/backup/restore', [BackupController::class, 'restoreForm'])
+    ->name('backup.restore.form');
+
+Route::post('/backup/restore', [BackupController::class, 'restore'])
+    ->name('backup.restore');
+
+
+// =============================
+// BACKUP SCHEDULE
+// =============================
+Route::get('/backup/schedule', [BackupController::class, 'schedule'])
+    ->name('backup.schedule');
+
+Route::post('/backup/schedule', [BackupController::class, 'saveSchedule'])
+    ->name('backup.schedule.save');
     });
 
     /*

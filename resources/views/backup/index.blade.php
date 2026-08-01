@@ -9,13 +9,29 @@
             <p class="text-muted mb-0">Create and manage downloadable backups of the clinic database.</p>
         </div>
 
-        <form action="{{ route('backup.create') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-primary rounded-pill px-4">
-                <i class="bi bi-hdd-stack"></i> Backup Now
-            </button>
-        </form>
-    </div>
+      <div class="d-flex gap-2">
+
+    <form action="{{ route('backup.create') }}" method="POST">
+        @csrf
+        <button class="btn btn-primary rounded-pill">
+            <i class="bi bi-hdd-stack"></i>
+            Backup Now
+        </button>
+    </form>
+
+    <a href="{{ route('backup.restore.form') }}"
+       class="btn btn-success rounded-pill">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Restore Database
+    </a>
+
+    <a href="{{ route('backup.schedule') }}"
+       class="btn btn-warning rounded-pill">
+        <i class="bi bi-clock-history"></i>
+        Automatic Backup
+    </a>
+
+</div>
 
     @if(session('success'))
         <div class="alert alert-success rounded-3">{{ session('success') }}</div>
@@ -43,17 +59,38 @@
                             <td>{{ $backup['size'] }} KB</td>
                             <td>{{ \Carbon\Carbon::createFromTimestamp($backup['date'])->format('M d, Y g:i A') }}</td>
                             <td>
-                                <a href="{{ route('backup.download', $backup['name']) }}" class="btn btn-outline-primary btn-sm rounded-pill">
-                                    Download
-                                </a>
-                                <form action="{{ route('backup.destroy', $backup['name']) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill"
-                                            onclick="return confirm('Delete this backup file?')">
-                                        Delete
-                                    </button>
-                                </form>
+
+    <a href="{{ route('backup.download',$backup['name']) }}"
+       class="btn btn-outline-primary btn-sm">
+        Download
+    </a>
+
+    <form
+        action="{{ route('backup.destroy',$backup['name']) }}"
+        method="POST"
+        class="d-inline">
+
+        @csrf
+        @method('DELETE')
+
+        <button
+            class="btn btn-outline-danger btn-sm"
+            onclick="return confirm('Delete backup?')">
+
+            Delete
+
+        </button>
+
+    </form>
+
+</td>
+                                <form action="{{ route('backup.restore', $backup['name']) }}" method="POST" class="d-inline">
+    @csrf
+    <button class="btn btn-outline-success btn-sm rounded-pill"
+        onclick="return confirm('Restore this backup? This will overwrite the current database.')">
+        Restore
+    </button>
+</form>
                             </td>
                         </tr>
                     @empty
