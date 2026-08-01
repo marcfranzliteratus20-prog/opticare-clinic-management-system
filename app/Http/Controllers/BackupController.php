@@ -83,14 +83,14 @@ dd([
         $mysqldumpPath = env('MYSQLDUMP_PATH', 'mysqldump');
 
         return sprintf(
-            '%s --user=%s --password=%s --host=%s %s > %s 2>&1',
-            escapeshellarg($mysqldumpPath),
-            escapeshellarg($db['username']),
-            escapeshellarg($db['password']),
-            escapeshellarg($db['host']),
-            escapeshellarg($db['database']),
-            escapeshellarg($fullPath)
-        );
+    '%s --host=%s --port=%s --username=%s --dbname=%s --no-password --format=plain --sslmode=require --file=%s',
+    escapeshellarg($pgDumpPath),
+    escapeshellarg($db['host']),
+    escapeshellarg($db['port'] ?? 5432),
+    escapeshellarg($db['username']),
+    escapeshellarg($db['database']),
+    escapeshellarg($fullPath)
+);
     }
 
     /**
