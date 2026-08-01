@@ -48,7 +48,13 @@ class BackupController extends Controller
             ? $this->buildPgDumpCommand($fullPath)
             : $this->buildMysqldumpCommand($fullPath);
 
-        exec($command, $output, $resultCode);
+       exec('which pg_dump', $whichOutput, $whichCode);
+
+dd([
+    'pg_dump_path' => $whichOutput,
+    'which_code' => $whichCode,
+    'command' => $command,
+]);
 
         if ($resultCode !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
             // Clean up an empty/failed file so it doesn't clutter the list
@@ -103,7 +109,7 @@ class BackupController extends Controller
         putenv('PGPASSWORD=' . $db['password']);
 
         // Set PGDUMP_PATH in .env if pg_dump isn't on the server's PATH.
-        $pgDumpPath = env('PGDUMP_PATH', 'pg_dump');
+   $pgDumpPath = env('PGDUMP_PATH', '/usr/bin/pg_dump');
 
         return sprintf(
             '%s --host=%s --port=%s --username=%s --no-password --format=plain %s > %s 2>&1',
