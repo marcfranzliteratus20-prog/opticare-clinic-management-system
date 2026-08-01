@@ -30,3 +30,5 @@ EXPOSE 80
 
 # Run migrations, optimize cache, and start services
 CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && nginx -g 'daemon off;' & php-fpm"]
+
+RUN apt-get update && apt-get install -y postgresql-client
