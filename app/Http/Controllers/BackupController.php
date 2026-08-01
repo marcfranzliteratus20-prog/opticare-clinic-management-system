@@ -75,26 +75,24 @@ dd([
     /**
      * Backup command for MySQL/MariaDB (local XAMPP setup).
      */
-    private function buildMysqldumpCommand(string $fullPath): string
-    {
-        $db = config('database.connections.mysql');
+   private function buildPgDumpCommand(string $fullPath): string
+{
+    $db = config('database.connections.pgsql');
 
-        // NOTE: on XAMPP/Windows, mysqldump.exe is often NOT on the system
-        // PATH. Set MYSQLDUMP_PATH in your .env to the full path, e.g.:
-        // MYSQLDUMP_PATH="C:\xampp\mysql\bin\mysqldump.exe"
-        $mysqldumpPath = env('MYSQLDUMP_PATH', 'mysqldump');
+    putenv("PGPASSWORD={$db['password']}");
 
-        return sprintf(
-    '%s --host=%s --port=%s --username=%s --dbname=%s --no-password --format=plain --sslmode=require --file=%s',
-    escapeshellarg($pgDumpPath),
-    escapeshellarg($db['host']),
-    escapeshellarg($db['port'] ?? 5432),
-    escapeshellarg($db['username']),
-    escapeshellarg($db['database']),
-    escapeshellarg($fullPath)
-);
-    }
+    $pgDumpPath = env('PGDUMP_PATH', '/usr/bin/pg_dump');
 
+    return sprintf(
+        '%s -h %s -p %s -U %s -F p -d %s -f %s',
+        $pgDumpPath,
+        $db['host'],
+        $db['port'],
+        $db['username'],
+        $db['database'],
+        $fullPath
+    );
+}
     /**
      * Backup command for PostgreSQL (Render deployment).
      */
