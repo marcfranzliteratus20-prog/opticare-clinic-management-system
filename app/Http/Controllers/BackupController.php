@@ -50,8 +50,10 @@ class BackupController extends Controller
 exec($command, $output, $resultCode);
 
 dd([
+    'command' => $command,
     'resultCode' => $resultCode,
     'output' => $output,
+    'error' => shell_exec($command . ' 2>&1'),
 ]);
         if ($resultCode !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
             // Clean up an empty/failed file so it doesn't clutter the list
