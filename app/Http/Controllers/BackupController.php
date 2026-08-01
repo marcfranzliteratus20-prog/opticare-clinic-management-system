@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BackupController extends Controller
 {
@@ -41,22 +42,11 @@ class BackupController extends Controller
         // download()/exists() unable to find the file.
         $fullPath = $disk->path(self::BACKUP_DIR . '/' . $filename);
 
-        $db = config('database.connections.mysql');
+        $driver = DB::connection()->getDriverName();
 
-        // NOTE: on XAMPP/Windows, mysqldump.exe is often NOT on the system
-        // PATH. Set MYSQLDUMP_PATH in your .env to the full path, e.g.:
-        // MYSQLDUMP_PATH="C:\xampp\mysql\bin\mysqldump.exe"
-        $mysqldumpPath = env('MYSQLDUMP_PATH', 'mysqldump');
-
-        $command = sprintf(
-            '%s --user=%s --password=%s --host=%s %s > %s 2>&1',
-            escapeshellarg($mysqldumpPath),
-            escapeshellarg($db['username']),
-            escapeshellarg($db['password']),
-            escapeshellarg($db['host']),
-            escapeshellarg($db['database']),
-            escapeshellarg($fullPath)
-        );
+        $command = $driver === 'pgsql'
+            ? $this->buildPgDumpCommand($fullPath)
+            : $this->buildMysqldumpCommand($fullPath);
 
         exec($command, $output, $resultCode);
 
@@ -66,13 +56,64 @@ class BackupController extends Controller
                 unlink($fullPath);
             }
 
+            $tool = $driver === 'pgsql' ? 'pg_dump' : 'mysqldump';
+
             return back()->with(
                 'error',
-                'Backup failed. Make sure mysqldump is installed and MYSQLDUMP_PATH is set correctly in your .env file.'
+                "Backup failed. Make sure {$tool} is installed and accessible on this server."
             );
         }
 
         return back()->with('success', 'Backup created successfully: ' . $filename);
+    }
+
+    /**
+     * Backup command for MySQL/MariaDB (local XAMPP setup).
+     */
+    private function buildMysqldumpCommand(string $fullPath): string
+    {
+        $db = config('database.connections.mysql');
+
+        // NOTE: on XAMPP/Windows, mysqldump.exe is often NOT on the system
+        // PATH. Set MYSQLDUMP_PATH in your .env to the full path, e.g.:
+        // MYSQLDUMP_PATH="C:\xampp\mysql\bin\mysqldump.exe"
+        $mysqldumpPath = env('MYSQLDUMP_PATH', 'mysqldump');
+
+        return sprintf(
+            '%s --user=%s --password=%s --host=%s %s > %s 2>&1',
+            escapeshellarg($mysqldumpPath),
+            escapeshellarg($db['username']),
+            escapeshellarg($db['password']),
+            escapeshellarg($db['host']),
+            escapeshellarg($db['database']),
+            escapeshellarg($fullPath)
+        );
+    }
+
+    /**
+     * Backup command for PostgreSQL (Render deployment).
+     */
+    private function buildPgDumpCommand(string $fullPath): string
+    {
+        $db = config('database.connections.pgsql');
+
+        // pg_dump doesn't accept a plaintext --password flag the way
+        // mysqldump does -- the standard way to pass it non-interactively
+        // is the PGPASSWORD environment variable.
+        putenv('PGPASSWORD=' . $db['password']);
+
+        // Set PGDUMP_PATH in .env if pg_dump isn't on the server's PATH.
+        $pgDumpPath = env('PGDUMP_PATH', 'pg_dump');
+
+        return sprintf(
+            '%s --host=%s --port=%s --username=%s --no-password --format=plain %s > %s 2>&1',
+            escapeshellarg($pgDumpPath),
+            escapeshellarg($db['host']),
+            escapeshellarg($db['port'] ?? 5432),
+            escapeshellarg($db['username']),
+            escapeshellarg($db['database']),
+            escapeshellarg($fullPath)
+        );
     }
 
     public function download(string $filename)
