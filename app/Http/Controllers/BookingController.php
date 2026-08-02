@@ -21,16 +21,21 @@ class BookingController extends Controller
             'gender' => 'required|in:Male,Female,Other',
             'contact_number' => 'required|string|max:20',
             'address' => 'required|string',
-            'type' => 'required|in:New Checkup,Follow-up,Frame Fitting,Contact Lens Fitting',
+
+            'type' => [
+                'required',
+                'in:Comprehensive Eye Examination,Prescription Eyeglasses,Contact Lens Fitting and Assessment,Ishihara Color Vision Test,Eye Condition Certification,Eyewear Accessories,Eyewear Repair and Maintenance,Other',
+            ],
+
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
         ]);
 
-        // Reuse the existing patient record if this contact number already
-        // has one on file (returning patient), otherwise create a new one
-        // from the info they entered.
+        // Reuse existing patient if contact number already exists
         $patient = Patient::firstOrCreate(
-            ['contact_number' => $validated['contact_number']],
+            [
+                'contact_number' => $validated['contact_number'],
+            ],
             [
                 'full_name' => $validated['full_name'],
                 'age' => $validated['age'],
@@ -51,8 +56,9 @@ class BookingController extends Controller
 
         return redirect()->route('booking.create')->with(
             'success',
-            'Your appointment request has been submitted! Our staff will contact you at ' .
-            $validated['contact_number'] . ' to confirm your schedule.'
+            'Your appointment request has been submitted! Our staff will contact you at '
+            . $validated['contact_number'] .
+            ' to confirm your schedule.'
         );
     }
 
