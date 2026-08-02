@@ -314,12 +314,13 @@
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Account Settings</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="dropdown-item text-danger">
-                                Logout
-                            </button>
-                        </form>
+                      <form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="dropdown-item text-danger">
+        <i class="bi bi-box-arrow-right me-2"></i>
+        Logout
+    </button>
+</form>
                     </li>
                 </ul>
             </div>
