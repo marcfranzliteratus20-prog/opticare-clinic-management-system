@@ -330,7 +330,10 @@
              <div class="field">
     <label><i class="bi bi-eyeglasses"></i> Reason for Visit</label>
 
-   <option value="" disabled {{ old('type') ? '' : 'selected' }}></option>
+    <select name="type" class="form-select" required>
+        <option value="" disabled {{ old('type') ? '' : 'selected' }}>
+            -- Select Reason for Visit --
+        </option>
 
         <option value="Comprehensive Eye Examination" {{ old('type') == 'Comprehensive Eye Examination' ? 'selected' : '' }}>
             Comprehensive Eye Examination
