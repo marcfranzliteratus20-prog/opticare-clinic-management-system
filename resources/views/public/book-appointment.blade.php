@@ -327,16 +327,47 @@
                     <textarea name="address" rows="2" required>{{ old('address') }}</textarea>
                 </div>
 
-                <div class="field">
-                    <label><i class="bi bi-eyeglasses"></i> Reason for Visit</label>
-                    <select name="type" required>
-                        <option value="New Checkup" {{ old('type') == 'New Checkup' ? 'selected' : '' }}>New Eye Checkup</option>
-                        <option value="Follow-up" {{ old('type') == 'Follow-up' ? 'selected' : '' }}>Follow-up Checkup</option>
-                        <option value="Frame Fitting" {{ old('type') == 'Frame Fitting' ? 'selected' : '' }}>Frame Fitting</option>
-                        <option value="Contact Lens Fitting" {{ old('type') == 'Contact Lens Fitting' ? 'selected' : '' }}>Contact Lens Fitting</option>
-                    </select>
-                </div>
+             <div class="field">
+    <label><i class="bi bi-eyeglasses"></i> Reason for Visit</label>
 
+    <select name="type" class="form-select" required>
+        <option value="" disabled {{ old('type') ? '' : 'selected' }}>
+            -- Select Reason for Visit --
+        </option>
+
+        <option value="Comprehensive Eye Examination" {{ old('type') == 'Comprehensive Eye Examination' ? 'selected' : '' }}>
+            Comprehensive Eye Examination
+        </option>
+
+        <option value="Prescription Eyeglasses" {{ old('type') == 'Prescription Eyeglasses' ? 'selected' : '' }}>
+            Prescription Eyeglasses
+        </option>
+
+        <option value="Contact Lens Fitting and Assessment" {{ old('type') == 'Contact Lens Fitting and Assessment' ? 'selected' : '' }}>
+            Contact Lens Fitting and Assessment
+        </option>
+
+        <option value="Ishihara Color Vision Test" {{ old('type') == 'Ishihara Color Vision Test' ? 'selected' : '' }}>
+            Ishihara Color Vision Test
+        </option>
+
+        <option value="Eye Condition Certification" {{ old('type') == 'Eye Condition Certification' ? 'selected' : '' }}>
+            Eye Condition Certification
+        </option>
+
+        <option value="Eyewear Accessories" {{ old('type') == 'Eyewear Accessories' ? 'selected' : '' }}>
+            Eyewear Accessories
+        </option>
+
+        <option value="Eyewear Repair and Maintenance" {{ old('type') == 'Eyewear Repair and Maintenance' ? 'selected' : '' }}>
+            Eyewear Repair and Maintenance
+        </option>
+
+        <option value="Other" {{ old('type') == 'Other' ? 'selected' : '' }}>
+            Other
+        </option>
+    </select>
+</div>
                 <div class="row-2">
                     <div class="field">
                         <label><i class="bi bi-calendar-event"></i> Preferred Date</label>
