@@ -10,7 +10,11 @@ class CheckLogin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Pinapayagan pumasok ang kahit sinong request
+        if (!session()->has('user')) {
+            return redirect()->route('login')
+                ->with('error', 'Please login first.');
+        }
+
         return $next($request);
     }
 }
