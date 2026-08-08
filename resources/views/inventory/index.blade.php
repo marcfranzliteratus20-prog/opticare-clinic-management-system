@@ -85,10 +85,19 @@
                         <tr>
                             <td>
                                 @if($item->image)
-                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->product_name }}" class="oc-thumb">
-                                @else
-                                    <div class="oc-thumb oc-thumb-placeholder"><i class="bi bi-image"></i></div>
-                                @endif
+    <img src="{{ \Illuminate\Support\Facades\Storage::url($item->image) }}"
+         alt="{{ $item->product_name }}"
+         class="oc-thumb"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+
+    <div class="oc-thumb oc-thumb-placeholder" style="display:none;">
+        <i class="bi bi-image"></i>
+    </div>
+@else
+    <div class="oc-thumb oc-thumb-placeholder">
+        <i class="bi bi-image"></i>
+    </div>
+@endif
                             </td>
                             <td>
                                 <span class="fw-semibold d-block">{{ $item->product_name }}</span>
