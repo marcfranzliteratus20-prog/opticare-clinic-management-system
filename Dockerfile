@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpq-dev
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Add PostgreSQL official repository
 RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
@@ -22,12 +24,11 @@ RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
 RUN echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
     > /etc/apt/sources.list.d/pgdg.list
 
-# Install PostgreSQL 18 client
+# Install PostgreSQL client
 RUN apt-get update && apt-get install -y \
-    postgresql-client-18
-
-# Clean apt cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    postgresql-client-18 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -51,15 +52,18 @@ COPY . .
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Create Laravel storage symbolic link
+RUN php artisan storage:link --force
+
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/sites-available/default
 
 # Set permissions
-RUN chmod -R 775 storage bootstrap/cache && \
-    chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 # Expose port
 EXPOSE 80
 
 # Start application
-CMD ["sh","-c","php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && nginx -g 'daemon off;' & php-fpm"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && nginx -g 'daemon off;' & php-fpm"]
