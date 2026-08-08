@@ -1,10 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Artisan;
-use App\Models\User;
 
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DashboardController;
@@ -22,208 +18,399 @@ use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
-| ROOT -- public landing page for guests. Logged-in users are redirected
-| straight to their dashboard instead of seeing the marketing page.
+| PUBLIC LANDING PAGE
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
+
     if (session()->has('user')) {
-        return session('user_role') === 'Admin'
-            ? redirect()->route('dashboard')
-            : redirect()->route('staff.dashboard');
+
+        if (session('user_role') === 'Admin') {
+            return redirect()->route('dashboard');
+        }
+
+        if (session('user_role') === 'Staff') {
+            return redirect()->route('staff.dashboard');
+        }
+
+        // Invalid role/session
+        session()->forget([
+            'user',
+            'user_name',
+            'user_role',
+        ]);
     }
 
     return view('public.landing');
-});
+})->name('home');
+
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ONLINE BOOKING -- no login required.
+| PUBLIC ONLINE BOOKING
+|--------------------------------------------------------------------------
+| No login required.
 |--------------------------------------------------------------------------
 */
-Route::get('/book-appointment', [BookingController::class, 'create'])->name('booking.create');
-Route::post('/book-appointment', [BookingController::class, 'store'])->name('booking.store');
 
-Route::get('/check-status', [BookingController::class, 'showStatusForm'])->name('booking.status.form');
-Route::post('/check-status', [BookingController::class, 'checkStatus'])
-    ->middleware('throttle:10,1')
-    ->name('booking.status');
+Route::get('/book-appointment', [
+    BookingController::class,
+    'create'
+])->name('booking.create');
+
+Route::post('/book-appointment', [
+    BookingController::class,
+    'store'
+])->name('booking.store');
+
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATION ROUTES
+| PUBLIC APPOINTMENT STATUS
+|--------------------------------------------------------------------------
+| No login required.
 |--------------------------------------------------------------------------
 */
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-Route::post('/login', [LoginController::class, 'login'])
-    ->middleware('throttle:5,1')
-    ->name('login.submit');
+Route::get('/check-status', [
+    BookingController::class,
+    'showStatusForm'
+])->name('booking.status.form');
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/check-status', [
+    BookingController::class,
+    'checkStatus'
+])
+->middleware('throttle:10,1')
+->name('booking.status');
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION
+|--------------------------------------------------------------------------
+*/
+
+/*
+|--------------------------------------------------------------------------
+| Login Page
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/login', [
+    LoginController::class,
+    'showLoginForm'
+])->name('login');
+
+
+/*
+|--------------------------------------------------------------------------
+| Login Submit
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/login', [
+    LoginController::class,
+    'login'
+])
+->middleware('throttle:5,1')
+->name('login.submit');
+
+
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+| POST only.
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/logout', [
+    LoginController::class,
+    'logout'
+])->name('logout');
+
 
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES
 |--------------------------------------------------------------------------
+| User must be logged in.
+|--------------------------------------------------------------------------
 */
+
 Route::middleware('check.login')->group(function () {
+
 
     /*
     |--------------------------------------------------------------------------
-    | GLOBAL SEARCH (ADMIN + STAFF)
+    | GLOBAL SEARCH
+    |--------------------------------------------------------------------------
+    | ADMIN + STAFF
     |--------------------------------------------------------------------------
     */
+
     Route::middleware('role:Admin,Staff')->group(function () {
-        Route::get('/search', [SearchController::class, 'index'])
-            ->name('search');
+
+        Route::get('/search', [
+            SearchController::class,
+            'index'
+        ])->name('search');
+
     });
+
 
     /*
     |--------------------------------------------------------------------------
     | ADMIN ONLY
     |--------------------------------------------------------------------------
     */
+
     Route::middleware('role:Admin')->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/dashboard', [
+            DashboardController::class,
+            'index'
+        ])->name('dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INVENTORY
+        |--------------------------------------------------------------------------
+        */
 
         Route::resource('inventory', InventoryController::class);
-        Route::put('/inventory/{inventory}/adjust', [InventoryController::class, 'adjustStock'])->name('inventory.adjust');
-        Route::get('/inventory-history', [InventoryController::class, 'stockHistory'])->name('inventory.history');
-        Route::get('/inventory-export', [InventoryController::class, 'exportCsv'])->name('inventory.export');
+
+        Route::put(
+            '/inventory/{inventory}/adjust',
+            [InventoryController::class, 'adjustStock']
+        )->name('inventory.adjust');
+
+        Route::get(
+            '/inventory-history',
+            [InventoryController::class, 'stockHistory']
+        )->name('inventory.history');
+
+        Route::get(
+            '/inventory-export',
+            [InventoryController::class, 'exportCsv']
+        )->name('inventory.export');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER MANAGEMENT
+        |--------------------------------------------------------------------------
+        */
 
         Route::resource('users', UserController::class);
 
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
 
-        Route::get('/archive', [ArchiveController::class, 'index'])->name('archive.index');
-        Route::put('/archive/{type}/{id}/restore', [ArchiveController::class, 'restore'])->name('archive.restore');
-        Route::delete('/archive/{type}/{id}/force', [ArchiveController::class, 'forceDelete'])->name('archive.force');
+        /*
+        |--------------------------------------------------------------------------
+        | REPORTS
+        |--------------------------------------------------------------------------
+        */
 
-      // =============================
-// DATABASE BACKUP
-// =============================
-Route::get('/backup', [BackupController::class, 'index'])
-    ->name('backup.index');
+        Route::get(
+            '/reports',
+            [ReportController::class, 'index']
+        )->name('reports.index');
 
-Route::post('/backup/create', [BackupController::class, 'create'])
-    ->name('backup.create');
-
-Route::get('/backup/download/{filename}', [BackupController::class, 'download'])
-    ->name('backup.download');
-
-Route::delete('/backup/delete/{filename}', [BackupController::class, 'destroy'])
-    ->name('backup.destroy');
+        Route::get(
+            '/reports/pdf',
+            [ReportController::class, 'exportPdf']
+        )->name('reports.pdf');
 
 
-// =============================
-// RESTORE DATABASE
-// =============================
-Route::get('/backup/restore', [BackupController::class, 'restoreForm'])
-    ->name('backup.restore.form');
+        /*
+        |--------------------------------------------------------------------------
+        | ARCHIVE
+        |--------------------------------------------------------------------------
+        */
 
-Route::post('/backup/restore', [BackupController::class, 'restore'])
-    ->name('backup.restore');
+        Route::get(
+            '/archive',
+            [ArchiveController::class, 'index']
+        )->name('archive.index');
+
+        Route::put(
+            '/archive/{type}/{id}/restore',
+            [ArchiveController::class, 'restore']
+        )->name('archive.restore');
+
+        Route::delete(
+            '/archive/{type}/{id}/force',
+            [ArchiveController::class, 'forceDelete']
+        )->name('archive.force');
 
 
-// =============================
-// BACKUP SCHEDULE
-// =============================
-Route::get('/backup/schedule', [BackupController::class, 'schedule'])
-    ->name('backup.schedule');
+        /*
+        |--------------------------------------------------------------------------
+        | DATABASE BACKUP
+        |--------------------------------------------------------------------------
+        */
 
-Route::post('/backup/schedule', [BackupController::class, 'saveSchedule'])
-    ->name('backup.schedule.save');
+        Route::get(
+            '/backup',
+            [BackupController::class, 'index']
+        )->name('backup.index');
+
+        Route::post(
+            '/backup/create',
+            [BackupController::class, 'create']
+        )->name('backup.create');
+
+        Route::get(
+            '/backup/download/{filename}',
+            [BackupController::class, 'download']
+        )->name('backup.download');
+
+        Route::delete(
+            '/backup/delete/{filename}',
+            [BackupController::class, 'destroy']
+        )->name('backup.destroy');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATABASE RESTORE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/backup/restore',
+            [BackupController::class, 'restoreForm']
+        )->name('backup.restore.form');
+
+        Route::post(
+            '/backup/restore',
+            [BackupController::class, 'restore']
+        )->name('backup.restore');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BACKUP SCHEDULE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/backup/schedule',
+            [BackupController::class, 'schedule']
+        )->name('backup.schedule');
+
+        Route::post(
+            '/backup/schedule',
+            [BackupController::class, 'saveSchedule']
+        )->name('backup.schedule.save');
+
     });
+
 
     /*
     |--------------------------------------------------------------------------
     | STAFF ONLY
     |--------------------------------------------------------------------------
     */
+
     Route::middleware('role:Staff')->group(function () {
 
-        Route::get('/staff/dashboard', [DashboardController::class, 'staffDashboard'])
-            ->name('staff.dashboard');
+        Route::get(
+            '/staff/dashboard',
+            [DashboardController::class, 'staffDashboard']
+        )->name('staff.dashboard');
+
     });
+
 
     /*
     |--------------------------------------------------------------------------
-    | SHARED MODULES (ADMIN + STAFF)
+    | SHARED MODULES
+    |--------------------------------------------------------------------------
+    | ADMIN + STAFF
     |--------------------------------------------------------------------------
     */
+
     Route::middleware('role:Admin,Staff')->group(function () {
 
-        Route::resource('patients', PatientController::class);
 
-        Route::resource('appointments', AppointmentController::class);
+        /*
+        |--------------------------------------------------------------------------
+        | PATIENTS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'patients',
+            PatientController::class
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPOINTMENTS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'appointments',
+            AppointmentController::class
+        );
 
         Route::put(
             '/appointments/{appointment}/complete',
             [AppointmentController::class, 'complete']
         )->name('appointments.complete');
 
-        Route::resource('billing', BillingController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | BILLING
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'billing',
+            BillingController::class
+        );
 
         Route::put(
             '/billing/{billing}/paid',
             [BillingController::class, 'markPaid']
         )->name('billing.paid');
 
-        Route::get('/billing/{billing}/receipt', [BillingController::class, 'receipt'])->name('billing.receipt');
+        Route::get(
+            '/billing/{billing}/receipt',
+            [BillingController::class, 'receipt']
+        )->name('billing.receipt');
 
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE / ACCOUNT SETTINGS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/profile',
+            [ProfileController::class, 'edit']
+        )->name('profile.edit');
+
+        Route::put(
+            '/profile',
+            [ProfileController::class, 'update']
+        )->name('profile.update');
+
     });
-});
 
-/*
-|--------------------------------------------------------------------------
-| TEMPORARY SETUP & MIGRATION HELPER ROUTES
-|--------------------------------------------------------------------------
-*/
-Route::get('/run-migration', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Database Migration Completed Successfully!';
-});
-
-Route::get('/setup-admin', function () {
-    $user = User::updateOrCreate(
-        ['email' => 'marcfranz2004@gmail.com'],
-        [
-            'name' => 'Admin User',
-            'password' => Hash::make('admin12345'),
-            'role' => 'Admin', // Naka-capital "A" para sa role:Admin middleware
-            'email_verified_at' => now(),
-        ]
-    );
-
-    // Kina-catches din sa session para sa custom `check.login` middleware
-    session([
-        'user' => $user,
-        'user_role' => 'Admin'
-    ]);
-
-    return 'SUCCESS! Admin user created or updated. You can now log in at /login with: marcfranz2004@gmail.com / admin12345';
-});
-
-Route::get('/force-login', function () {
-    $user = User::where('email', 'marcfranz2004@gmail.com')->first();
-    
-    if (!$user) {
-        return 'Wala pang user na ganyan sa database! I-run muna ang /setup-admin';
-    }
-
-    Auth::login($user);
-
-    // Sine-set ang session na ginagamit sa root / check.login middleware
-    session([
-        'user' => $user,
-        'user_role' => $user->role ?? 'Admin'
-    ]);
-
-    return redirect()->route('dashboard');
 });
