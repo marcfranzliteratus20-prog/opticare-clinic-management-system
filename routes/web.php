@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DashboardController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +37,6 @@ Route::get('/', function () {
             return redirect()->route('staff.dashboard');
         }
 
-        // Invalid role/session
         session()->forget([
             'user',
             'user_name',
@@ -43,14 +45,13 @@ Route::get('/', function () {
     }
 
     return view('public.landing');
+
 })->name('home');
 
 
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ONLINE BOOKING
-|--------------------------------------------------------------------------
-| No login required.
 |--------------------------------------------------------------------------
 */
 
@@ -68,8 +69,6 @@ Route::post('/book-appointment', [
 /*
 |--------------------------------------------------------------------------
 | PUBLIC APPOINTMENT STATUS
-|--------------------------------------------------------------------------
-| No login required.
 |--------------------------------------------------------------------------
 */
 
@@ -92,23 +91,10 @@ Route::post('/check-status', [
 |--------------------------------------------------------------------------
 */
 
-/*
-|--------------------------------------------------------------------------
-| Login Page
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/login', [
     LoginController::class,
     'showLoginForm'
 ])->name('login');
-
-
-/*
-|--------------------------------------------------------------------------
-| Login Submit
-|--------------------------------------------------------------------------
-*/
 
 Route::post('/login', [
     LoginController::class,
@@ -116,15 +102,6 @@ Route::post('/login', [
 ])
 ->middleware('throttle:5,1')
 ->name('login.submit');
-
-
-/*
-|--------------------------------------------------------------------------
-| Logout
-|--------------------------------------------------------------------------
-| POST only.
-|--------------------------------------------------------------------------
-*/
 
 Route::post('/logout', [
     LoginController::class,
@@ -135,8 +112,6 @@ Route::post('/logout', [
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES
-|--------------------------------------------------------------------------
-| User must be logged in.
 |--------------------------------------------------------------------------
 */
 
@@ -157,6 +132,91 @@ Route::middleware('check.login')->group(function () {
             SearchController::class,
             'index'
         ])->name('search');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFICATION CHECK
+    |--------------------------------------------------------------------------
+    | ADMIN + STAFF
+    |--------------------------------------------------------------------------
+    |
+    | JavaScript will check this every 5 seconds.
+    | If a new Online appointment exists, it returns the appointment ID.
+    |
+    */
+
+    Route::middleware('role:Admin,Staff')->group(function () {
+
+        Route::get('/notifications/check-online-appointment', function () {
+
+            try {
+
+                if (!Schema::hasTable('appointments')) {
+
+                    return response()->json([
+                        'success' => true,
+                        'has_new' => false,
+                        'appointment_id' => null,
+                    ]);
+                }
+
+                $query = DB::table('appointments');
+
+                /*
+                |--------------------------------------------------------------------------
+                | Make sure source column exists
+                |--------------------------------------------------------------------------
+                */
+
+                if (!Schema::hasColumn('appointments', 'source')) {
+
+                    return response()->json([
+                        'success' => true,
+                        'has_new' => false,
+                        'appointment_id' => null,
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find latest ONLINE appointment
+                |--------------------------------------------------------------------------
+                */
+
+                $latest = $query
+                    ->whereRaw('LOWER(source) = ?', ['online'])
+                    ->orderByDesc('id')
+                    ->first();
+
+                if (!$latest) {
+
+                    return response()->json([
+                        'success' => true,
+                        'has_new' => false,
+                        'appointment_id' => null,
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'has_new' => true,
+                    'appointment_id' => $latest->id,
+                    'created_at' => $latest->created_at ?? null,
+                ]);
+
+            } catch (\Throwable $e) {
+
+                return response()->json([
+                    'success' => false,
+                    'has_new' => false,
+                    'appointment_id' => null,
+                ]);
+            }
+
+        })->name('notifications.check-online-appointment');
 
     });
 
@@ -397,7 +457,7 @@ Route::middleware('check.login')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | PROFILE / ACCOUNT SETTINGS
+        | PROFILE
         |--------------------------------------------------------------------------
         */
 
