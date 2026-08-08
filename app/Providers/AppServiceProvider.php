@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Pagination\Paginator;
+
 use App\Models\Appointment;
 use App\Models\Inventory;
 use App\Models\Billing;
@@ -23,40 +25,57 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer([
-            'layouts.app',
-            'layouts.staff',
-        ], function ($view) {
+        /*
+        |--------------------------------------------------------------------------
+        | USE BOOTSTRAP 5 PAGINATION
+        |--------------------------------------------------------------------------
+        */
+
+        Paginator::useBootstrapFive();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GLOBAL NOTIFICATIONS
+        |--------------------------------------------------------------------------
+        */
+
+        View::composer('*', function ($view) {
 
             /*
             |--------------------------------------------------------------------------
-            | APPOINTMENTS
+            | TODAY'S APPOINTMENTS
             |--------------------------------------------------------------------------
             */
 
-            $todayAppointments = 0;
-            $pendingAppointments = 0;
-            $completedAppointments = 0;
+            $todayAppointments = Appointment::whereDate(
+                'appointment_date',
+                now()->toDateString()
+            )->count();
 
-            try {
-                $todayAppointments = Appointment::whereDate(
-                    'appointment_date',
-                    now()->toDateString()
-                )->count();
 
-                $pendingAppointments = Appointment::where(
-                    'status',
-                    'Pending'
-                )->count();
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING APPOINTMENTS
+            |--------------------------------------------------------------------------
+            */
 
-                $completedAppointments = Appointment::where(
-                    'status',
-                    'Completed'
-                )->count();
+            $pendingAppointments = Appointment::where(
+                'status',
+                'Pending'
+            )->count();
 
-            } catch (\Throwable $e) {
-                // Prevent layout from breaking if a column/table is unavailable.
-            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMPLETED APPOINTMENTS
+            |--------------------------------------------------------------------------
+            */
+
+            $completedAppointments = Appointment::where(
+                'status',
+                'Completed'
+            )->count();
 
 
             /*
@@ -65,18 +84,11 @@ class AppServiceProvider extends ServiceProvider
             |--------------------------------------------------------------------------
             */
 
-            $lowStock = 0;
-
-            try {
-                $lowStock = Inventory::whereColumn(
-                    'quantity',
-                    '<=',
-                    'reorder_level'
-                )->count();
-
-            } catch (\Throwable $e) {
-                // Prevent layout from breaking.
-            }
+            $lowStock = Inventory::where(
+                'quantity',
+                '<=',
+                5
+            )->count();
 
 
             /*
@@ -85,25 +97,10 @@ class AppServiceProvider extends ServiceProvider
             |--------------------------------------------------------------------------
             */
 
-            $unpaidBilling = 0;
-
-            try {
-
-                /*
-                 * Change "status" if your billing table uses
-                 * another column for payment status.
-                 */
-
-                $unpaidBilling = Billing::whereIn('status', [
-                    'Unpaid',
-                    'Pending',
-                    ' unpaid',
-                    'pending',
-                ])->count();
-
-            } catch (\Throwable $e) {
-                // Prevent layout from breaking.
-            }
+            $unpaidBilling = Billing::where(
+                'status',
+                'Unpaid'
+            )->count();
 
 
             /*
@@ -114,23 +111,37 @@ class AppServiceProvider extends ServiceProvider
 
             $totalNotifications =
                 $todayAppointments +
+                $pendingAppointments +
                 $lowStock +
                 $unpaidBilling;
 
 
             /*
             |--------------------------------------------------------------------------
-            | SHARE WITH LAYOUTS
+            | SHARE VARIABLES
             |--------------------------------------------------------------------------
             */
 
             $view->with([
-                'todayAppointments'     => $todayAppointments,
-                'pendingAppointments'   => $pendingAppointments,
-                'completedAppointments' => $completedAppointments,
-                'lowStock'              => $lowStock,
-                'unpaidBilling'         => $unpaidBilling,
-                'totalNotifications'    => $totalNotifications,
+
+                'todayAppointments' =>
+                    $todayAppointments,
+
+                'pendingAppointments' =>
+                    $pendingAppointments,
+
+                'completedAppointments' =>
+                    $completedAppointments,
+
+                'lowStock' =>
+                    $lowStock,
+
+                'unpaidBilling' =>
+                    $unpaidBilling,
+
+                'totalNotifications' =>
+                    $totalNotifications,
+
             ]);
         });
     }

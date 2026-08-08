@@ -53,8 +53,15 @@
                         <tr>
                             <td class="fw-semibold">{{ $appointment->patient->full_name ?? 'Unknown patient' }}</td>
                             <td>{{ $appointment->type ?? 'New Checkup' }}</td>
-                            <td>{{ $appointment->appointment_date }}</td>
-                            <td>{{ $appointment->appointment_time }}</td>
+                            {{-- DATE --}}
+<td>
+    {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
+</td>
+
+{{-- TIME --}}
+<td>
+    {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}
+</td>
                             <td>{{ $appointment->doctor_name }}</td>
                             <td>
                                 @if(($appointment->source ?? 'Staff') == 'Online')

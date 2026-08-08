@@ -12,19 +12,28 @@
 
     <title>OptiCare Clinic Management System</title>
 
-    <!-- Bootstrap -->
+    <!-- =========================================================
+         BOOTSTRAP
+    ========================================================== -->
+
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
-    <!-- Bootstrap Icons -->
+    <!-- =========================================================
+         BOOTSTRAP ICONS
+    ========================================================== -->
+
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
         rel="stylesheet"
     >
 
-    <!-- Fonts -->
+    <!-- =========================================================
+         FONTS
+    ========================================================== -->
+
     <link rel="preconnect" href="https://fonts.bunny.net">
 
     <link
@@ -72,7 +81,7 @@
 
         /* =========================================================
            PAGINATION
-        ========================================================= */
+        ========================================================== */
 
         .pagination svg,
         nav svg {
@@ -84,7 +93,7 @@
 
         /* =========================================================
            TOP BAR
-        ========================================================= */
+        ========================================================== */
 
         .topbar {
 
@@ -156,7 +165,7 @@
 
         /* =========================================================
            SEARCH
-        ========================================================= */
+        ========================================================== */
 
         .topbar-search {
 
@@ -226,7 +235,7 @@
 
         /* =========================================================
            NOTIFICATION
-        ========================================================= */
+        ========================================================== */
 
         .notification-wrapper {
 
@@ -301,12 +310,14 @@
             font-weight: 700;
 
             line-height: 1;
+
+            border: 2px solid var(--oc-teal-dark);
         }
 
 
         /* =========================================================
            USER
-        ========================================================= */
+        ========================================================== */
 
         .topbar-avatar {
 
@@ -331,6 +342,8 @@
             font-size: 0.9rem;
 
             text-decoration: none;
+
+            cursor: pointer;
         }
 
 
@@ -340,10 +353,12 @@
 
             border-radius: 14px;
 
-            min-width: 230px;
+            min-width: 250px;
 
             box-shadow:
                 0 12px 35px rgba(28,43,51,0.14);
+
+            z-index: 2000;
         }
 
 
@@ -378,8 +393,82 @@
 
 
         /* =========================================================
+           NOTIFICATION ITEMS
+        ========================================================== */
+
+        .notification-item {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+        }
+
+
+        .notification-item-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+
+        .notification-item-left i {
+
+            width: 20px;
+
+            text-align: center;
+        }
+
+
+        .notification-count {
+
+            min-width: 25px;
+
+            text-align: center;
+
+            border-radius: 20px;
+
+            font-size: 0.7rem;
+
+            font-weight: 700;
+
+            padding: 4px 8px;
+        }
+
+
+        .notification-count.warning {
+
+            background: var(--oc-gold);
+
+            color: white;
+        }
+
+
+        .notification-count.danger {
+
+            background: var(--oc-terracotta);
+
+            color: white;
+        }
+
+
+        .notification-count.success {
+
+            background: var(--oc-sage);
+
+            color: white;
+        }
+
+
+        /* =========================================================
            SIDEBAR
-        ========================================================= */
+        ========================================================== */
 
         .sidebar {
 
@@ -528,12 +617,16 @@
         .sidebar-link .bg-success {
 
             background: var(--oc-sage) !important;
+
+            color: white !important;
         }
 
 
         .sidebar-link .bg-danger {
 
             background: var(--oc-terracotta) !important;
+
+            color: white !important;
         }
 
 
@@ -592,7 +685,7 @@
 
         /* =========================================================
            MAIN CONTENT
-        ========================================================= */
+        ========================================================== */
 
         .main-content {
 
@@ -614,7 +707,7 @@
 
         /* =========================================================
            RESPONSIVE
-        ========================================================= */
+        ========================================================== */
 
         @media (max-width: 900px) {
 
@@ -673,11 +766,231 @@
 <body>
 
 
+@php
+
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL NOTIFICATION COUNTS
+    |--------------------------------------------------------------------------
+    |
+    | IMPORTANT:
+    | These values are calculated here so they are available on EVERY
+    | page that uses app.blade.php.
+    |
+    */
+
+
+    $pendingAppointments = 0;
+    $completedAppointments = 0;
+    $todayAppointments = 0;
+
+    $unpaidBilling = 0;
+
+    $lowStock = 0;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | APPOINTMENTS
+    |--------------------------------------------------------------------------
+    */
+
+    try {
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('appointments')) {
+
+            $appointmentQuery =
+                \Illuminate\Support\Facades\DB::table('appointments');
+
+
+            /*
+            | Pending
+            */
+
+            if (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'appointments',
+                    'status'
+                )
+            ) {
+
+                $pendingAppointments =
+                    (clone $appointmentQuery)
+                    ->whereRaw('LOWER(status) = ?', ['pending'])
+                    ->count();
+
+
+                /*
+                | Completed
+                */
+
+                $completedAppointments =
+                    (clone $appointmentQuery)
+                    ->whereRaw('LOWER(status) = ?', ['completed'])
+                    ->count();
+
+            }
+
+
+            /*
+            | Today's appointments
+            */
+
+            if (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'appointments',
+                    'appointment_date'
+                )
+            ) {
+
+                $todayAppointments =
+                    (clone $appointmentQuery)
+                    ->whereDate(
+                        'appointment_date',
+                        now()->toDateString()
+                    )
+                    ->count();
+
+            }
+
+        }
+
+    } catch (\Throwable $e) {
+
+        $pendingAppointments = 0;
+
+        $completedAppointments = 0;
+
+        $todayAppointments = 0;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BILLING
+    |--------------------------------------------------------------------------
+    */
+
+    try {
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('billings')) {
+
+            $billingQuery =
+                \Illuminate\Support\Facades\DB::table('billings');
+
+
+            if (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'billings',
+                    'payment_status'
+                )
+            ) {
+
+                $unpaidBilling =
+                    (clone $billingQuery)
+                    ->whereRaw(
+                        'LOWER(payment_status) = ?',
+                        ['unpaid']
+                    )
+                    ->count();
+
+            } elseif (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'billings',
+                    'status'
+                )
+            ) {
+
+                $unpaidBilling =
+                    (clone $billingQuery)
+                    ->whereRaw(
+                        'LOWER(status) = ?',
+                        ['unpaid']
+                    )
+                    ->count();
+
+            }
+
+        }
+
+    } catch (\Throwable $e) {
+
+        $unpaidBilling = 0;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INVENTORY
+    |--------------------------------------------------------------------------
+    |
+    | Low-stock threshold = 10
+    |
+    */
+
+    try {
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('inventories')) {
+
+            $inventoryQuery =
+                \Illuminate\Support\Facades\DB::table('inventories');
+
+
+            if (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'inventories',
+                    'stock'
+                )
+            ) {
+
+                $lowStock =
+                    (clone $inventoryQuery)
+                    ->where('stock', '<=', 10)
+                    ->count();
+
+            } elseif (
+                \Illuminate\Support\Facades\Schema::hasColumn(
+                    'inventories',
+                    'quantity'
+                )
+            ) {
+
+                $lowStock =
+                    (clone $inventoryQuery)
+                    ->where('quantity', '<=', 10)
+                    ->count();
+
+            }
+
+        }
+
+    } catch (\Throwable $e) {
+
+        $lowStock = 0;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL NOTIFICATIONS
+    |--------------------------------------------------------------------------
+    */
+
+    $totalNotifications =
+        $todayAppointments
+        + $lowStock
+        + $unpaidBilling;
+
+@endphp
+
+
+
 <!-- =========================================================
      TOP BAR
 ========================================================= -->
 
 <div class="topbar">
+
 
     <!-- LOGO -->
 
@@ -690,10 +1003,13 @@
     </div>
 
 
+
     <div class="topbar-right">
 
 
-        <!-- SEARCH -->
+        <!-- =====================================================
+             SEARCH
+        ====================================================== -->
 
         <form
             action="{{ route('search') }}"
@@ -713,11 +1029,13 @@
         </form>
 
 
+
         <!-- =====================================================
-             NOTIFICATION
+             NOTIFICATIONS
         ====================================================== -->
 
         <div class="dropdown notification-wrapper">
+
 
             <a
                 href="#"
@@ -731,11 +1049,14 @@
                 <i class="bi bi-bell-fill"></i>
 
 
-                @if(($totalNotifications ?? 0) > 0)
+                @if($totalNotifications > 0)
 
                     <span class="notification-badge">
 
-                        {{ $totalNotifications > 99 ? '99+' : $totalNotifications }}
+                        {{ $totalNotifications > 99
+                            ? '99+'
+                            : $totalNotifications
+                        }}
 
                     </span>
 
@@ -744,10 +1065,14 @@
             </a>
 
 
+
+            <!-- NOTIFICATION DROPDOWN -->
+
             <ul
                 class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
                 aria-labelledby="notificationDropdown"
             >
+
 
                 <li>
 
@@ -760,21 +1085,31 @@
                 </li>
 
 
+
+                <!-- TODAY'S APPOINTMENTS -->
+
                 <li>
 
                     <a
-                        class="dropdown-item d-flex justify-content-between align-items-center"
+                        class="dropdown-item notification-item"
                         href="{{ route('appointments.index') }}"
                     >
 
-                        <span>
-                            <i class="bi bi-calendar-check me-2"></i>
+                        <span class="notification-item-left">
+
+                            <i
+                                class="bi bi-calendar-check"
+                                style="color: var(--oc-gold);"
+                            ></i>
+
                             Today's Appointments
+
                         </span>
 
-                        <span class="badge bg-warning rounded-pill">
 
-                            {{ $todayAppointments ?? 0 }}
+                        <span class="notification-count warning">
+
+                            {{ $todayAppointments }}
 
                         </span>
 
@@ -783,21 +1118,31 @@
                 </li>
 
 
+
+                <!-- LOW STOCK -->
+
                 <li>
 
                     <a
-                        class="dropdown-item d-flex justify-content-between align-items-center"
+                        class="dropdown-item notification-item"
                         href="{{ route('inventory.index') }}"
                     >
 
-                        <span>
-                            <i class="bi bi-box-seam me-2"></i>
+                        <span class="notification-item-left">
+
+                            <i
+                                class="bi bi-box-seam"
+                                style="color: var(--oc-terracotta);"
+                            ></i>
+
                             Low Stock
+
                         </span>
 
-                        <span class="badge bg-danger rounded-pill">
 
-                            {{ $lowStock ?? 0 }}
+                        <span class="notification-count danger">
+
+                            {{ $lowStock }}
 
                         </span>
 
@@ -805,32 +1150,44 @@
 
                 </li>
 
+
+
+                <!-- UNPAID BILLING -->
 
                 <li>
 
                     <a
-                        class="dropdown-item d-flex justify-content-between align-items-center"
+                        class="dropdown-item notification-item"
                         href="{{ route('billing.index') }}"
                     >
 
-                        <span>
-                            <i class="bi bi-receipt me-2"></i>
+                        <span class="notification-item-left">
+
+                            <i
+                                class="bi bi-receipt"
+                                style="color: var(--oc-terracotta);"
+                            ></i>
+
                             Unpaid Billing
+
                         </span>
 
-                        <span class="badge bg-danger rounded-pill">
 
-                            {{ $unpaidBilling ?? 0 }}
+                        <span class="notification-count danger">
+
+                            {{ $unpaidBilling }}
 
                         </span>
 
                     </a>
 
                 </li>
+
 
             </ul>
 
         </div>
+
 
 
         <!-- =====================================================
@@ -838,6 +1195,7 @@
         ====================================================== -->
 
         <div class="dropdown">
+
 
             <a
                 href="#"
@@ -847,15 +1205,23 @@
                 aria-expanded="false"
             >
 
-                {{ strtoupper(substr(session('user_name', 'A'), 0, 1)) }}
+                {{ strtoupper(
+                    substr(
+                        session('user_name', 'A'),
+                        0,
+                        1
+                    )
+                ) }}
 
             </a>
+
 
 
             <ul
                 class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
                 aria-labelledby="userDropdown"
             >
+
 
                 <li>
 
@@ -866,6 +1232,7 @@
                     </h6>
 
                 </li>
+
 
 
                 <li>
@@ -884,9 +1251,13 @@
                 </li>
 
 
+
                 <li>
+
                     <hr class="dropdown-divider">
+
                 </li>
+
 
 
                 <li>
@@ -913,9 +1284,11 @@
 
                 </li>
 
+
             </ul>
 
         </div>
+
 
     </div>
 
@@ -930,6 +1303,8 @@
 <div class="sidebar">
 
 
+    <!-- SIDEBAR HEADER -->
+
     <div class="sidebar-header">
 
         <i class="bi bi-eyeglasses me-2"></i>
@@ -941,11 +1316,15 @@
     </div>
 
 
-    <!-- DASHBOARD -->
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
 
     <a
         href="{{ route('dashboard') }}"
-        class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+        class="sidebar-link
+        {{ request()->routeIs('dashboard') ? 'active' : '' }}"
     >
 
         <i class="bi bi-speedometer2 me-2"></i>
@@ -955,11 +1334,15 @@
     </a>
 
 
-    <!-- PATIENTS -->
+
+    <!-- =====================================================
+         PATIENTS
+    ====================================================== -->
 
     <a
         href="{{ route('patients.index') }}"
-        class="sidebar-link {{ request()->routeIs('patients.*') ? 'active' : '' }}"
+        class="sidebar-link
+        {{ request()->routeIs('patients.*') ? 'active' : '' }}"
     >
 
         <i class="bi bi-person-lines-fill me-2"></i>
@@ -969,47 +1352,54 @@
     </a>
 
 
+
+    <!-- =====================================================
+         APPOINTMENTS
+    ====================================================== -->
+
     <!-- APPOINTMENTS -->
+<a
+    href="{{ route('appointments.index') }}"
+    class="sidebar-link {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
+>
+    <i class="bi bi-calendar-check me-2"></i>
 
-    <a
-        href="{{ route('appointments.index') }}"
-        class="sidebar-link {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
-    >
+    <span>Appointments</span>
 
-        <i class="bi bi-calendar-check me-2"></i>
+    <div class="ms-auto d-flex align-items-center gap-1">
 
-        Appointments
-
-
+        {{-- Pending --}}
         @if(($pendingAppointments ?? 0) > 0)
-
-            <span class="badge bg-warning text-dark">
-
+            <span
+                class="badge bg-warning rounded-pill"
+                title="Pending Appointments"
+            >
                 {{ $pendingAppointments }}
-
             </span>
-
         @endif
 
-
+        {{-- Completed --}}
         @if(($completedAppointments ?? 0) > 0)
-
-            <span class="badge bg-success ms-1">
-
+            <span
+                class="badge bg-success rounded-pill"
+                title="Completed Appointments"
+            >
                 {{ $completedAppointments }}
-
             </span>
-
         @endif
 
-    </a>
+    </div>
+</a>
 
 
-    <!-- BILLING -->
+    <!-- =====================================================
+         BILLING
+    ====================================================== -->
 
     <a
         href="{{ route('billing.index') }}"
-        class="sidebar-link {{ request()->routeIs('billing.*') ? 'active' : '' }}"
+        class="sidebar-link
+        {{ request()->routeIs('billing.*') ? 'active' : '' }}"
     >
 
         <i class="bi bi-receipt me-2"></i>
@@ -1017,7 +1407,7 @@
         Billing
 
 
-        @if(($unpaidBilling ?? 0) > 0)
+        @if($unpaidBilling > 0)
 
             <span class="badge bg-danger">
 
@@ -1030,11 +1420,15 @@
     </a>
 
 
-    <!-- INVENTORY -->
+
+    <!-- =====================================================
+         INVENTORY
+    ====================================================== -->
 
     <a
         href="{{ route('inventory.index') }}"
-        class="sidebar-link {{ request()->routeIs('inventory.*') ? 'active' : '' }}"
+        class="sidebar-link
+        {{ request()->routeIs('inventory.*') ? 'active' : '' }}"
     >
 
         <i class="bi bi-box-seam me-2"></i>
@@ -1042,7 +1436,7 @@
         Inventory
 
 
-        @if(($lowStock ?? 0) > 0)
+        @if($lowStock > 0)
 
             <span class="badge bg-danger">
 
@@ -1055,11 +1449,15 @@
     </a>
 
 
-    <!-- REPORTS -->
+
+    <!-- =====================================================
+         REPORTS
+    ====================================================== -->
 
     <a
         href="{{ route('reports.index') }}"
-        class="sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+        class="sidebar-link
+        {{ request()->routeIs('reports.*') ? 'active' : '' }}"
     >
 
         <i class="bi bi-graph-up me-2"></i>
@@ -1069,17 +1467,29 @@
     </a>
 
 
+
     <hr class="sidebar-divider">
 
 
-    <!-- UTILITIES -->
+
+    <!-- =====================================================
+         UTILITIES
+    ====================================================== -->
 
     <a
         href="#utilitiesMenu"
         class="sidebar-link"
         data-bs-toggle="collapse"
         role="button"
-        aria-expanded="{{ request()->routeIs(['users.*', 'archive.*', 'backup.*']) ? 'true' : 'false' }}"
+        aria-expanded="{{
+            request()->routeIs([
+                'users.*',
+                'archive.*',
+                'backup.*'
+            ])
+            ? 'true'
+            : 'false'
+        }}"
     >
 
         <i class="bi bi-tools me-2"></i>
@@ -1091,8 +1501,18 @@
     </a>
 
 
+
     <div
-        class="collapse {{ request()->routeIs(['users.*', 'archive.*', 'backup.*']) ? 'show' : '' }}"
+        class="collapse
+        {{
+            request()->routeIs([
+                'users.*',
+                'archive.*',
+                'backup.*'
+            ])
+            ? 'show'
+            : ''
+        }}"
         id="utilitiesMenu"
     >
 
@@ -1101,7 +1521,8 @@
 
         <a
             href="{{ route('users.index') }}"
-            class="sidebar-sublink {{ request()->routeIs('users.*') ? 'active' : '' }}"
+            class="sidebar-sublink
+            {{ request()->routeIs('users.*') ? 'active' : '' }}"
         >
 
             <i class="bi bi-people me-2"></i>
@@ -1111,11 +1532,13 @@
         </a>
 
 
+
         <!-- ARCHIVE -->
 
         <a
             href="{{ route('archive.index') }}"
-            class="sidebar-sublink {{ request()->routeIs('archive.*') ? 'active' : '' }}"
+            class="sidebar-sublink
+            {{ request()->routeIs('archive.*') ? 'active' : '' }}"
         >
 
             <i class="bi bi-archive me-2"></i>
@@ -1125,11 +1548,13 @@
         </a>
 
 
+
         <!-- BACKUP -->
 
         <a
             href="{{ route('backup.index') }}"
-            class="sidebar-sublink {{ request()->routeIs('backup.*') ? 'active' : '' }}"
+            class="sidebar-sublink
+            {{ request()->routeIs('backup.*') ? 'active' : '' }}"
         >
 
             <i class="bi bi-hdd-stack me-2"></i>
@@ -1138,7 +1563,9 @@
 
         </a>
 
+
     </div>
+
 
 </div>
 
