@@ -12,27 +12,30 @@
 
     <title>OptiCare Clinic Management System</title>
 
-    <!-- =========================================================
+
+    <!-- =====================================================
          BOOTSTRAP
-    ========================================================== -->
+    ====================================================== -->
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
-    <!-- =========================================================
+
+    <!-- =====================================================
          BOOTSTRAP ICONS
-    ========================================================== -->
+    ====================================================== -->
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
         rel="stylesheet"
     >
 
-    <!-- =========================================================
+
+    <!-- =====================================================
          FONTS
-    ========================================================== -->
+    ====================================================== -->
 
     <link rel="preconnect" href="https://fonts.bunny.net">
 
@@ -40,6 +43,11 @@
         href="https://fonts.bunny.net/css?family=fraunces:500,600,700|inter:400,500,600,700"
         rel="stylesheet"
     >
+
+
+    <!-- =====================================================
+         CUSTOM CSS
+    ====================================================== -->
 
     <style>
 
@@ -65,6 +73,19 @@
         }
 
 
+        html,
+        body {
+
+            width: 100%;
+
+            min-height: 100%;
+
+            margin: 0;
+
+            padding: 0;
+        }
+
+
         body {
 
             font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -73,15 +94,13 @@
 
             color: var(--oc-ink);
 
-            margin: 0;
-
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
 
-        /* =========================================================
+        /* =====================================================
            PAGINATION
-        ========================================================== */
+        ====================================================== */
 
         .pagination svg,
         nav svg {
@@ -91,9 +110,9 @@
         }
 
 
-        /* =========================================================
-           TOP BAR
-        ========================================================== */
+        /* =====================================================
+           TOPBAR
+        ====================================================== */
 
         .topbar {
 
@@ -163,9 +182,43 @@
         }
 
 
-        /* =========================================================
+        /* MOBILE MENU BUTTON */
+
+        .mobile-menu-btn {
+
+            display: none;
+
+            border: none;
+
+            background: transparent;
+
+            color: white;
+
+            font-size: 1.35rem;
+
+            width: 40px;
+
+            height: 40px;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+        }
+
+
+        .mobile-menu-btn:hover {
+
+            background: rgba(255,255,255,0.12);
+        }
+
+
+        /* =====================================================
            SEARCH
-        ========================================================== */
+        ====================================================== */
 
         .topbar-search {
 
@@ -233,9 +286,9 @@
         }
 
 
-        /* =========================================================
+        /* =====================================================
            NOTIFICATION
-        ========================================================== */
+        ====================================================== */
 
         .notification-wrapper {
 
@@ -315,9 +368,9 @@
         }
 
 
-        /* =========================================================
-           USER
-        ========================================================== */
+        /* =====================================================
+           USER AVATAR
+        ====================================================== */
 
         .topbar-avatar {
 
@@ -392,9 +445,9 @@
         }
 
 
-        /* =========================================================
+        /* =====================================================
            NOTIFICATION ITEMS
-        ========================================================== */
+        ====================================================== */
 
         .notification-item {
 
@@ -466,9 +519,9 @@
         }
 
 
-        /* =========================================================
+        /* =====================================================
            SIDEBAR
-        ========================================================== */
+        ====================================================== */
 
         .sidebar {
 
@@ -495,6 +548,8 @@
             overflow-y: auto;
 
             z-index: 1000;
+
+            transition: left 0.25s ease;
         }
 
 
@@ -683,9 +738,33 @@
         }
 
 
-        /* =========================================================
+        /* =====================================================
+           MOBILE OVERLAY
+        ====================================================== */
+
+        .sidebar-overlay {
+
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            background: rgba(0,0,0,0.35);
+
+            z-index: 1090;
+        }
+
+
+        /* =====================================================
            MAIN CONTENT
-        ========================================================== */
+        ====================================================== */
 
         .main-content {
 
@@ -695,19 +774,75 @@
 
             padding: 28px;
 
+            width: calc(100% - 260px);
+
             min-height: calc(100vh - 70px);
+
+            overflow-x: hidden;
         }
 
 
         .page-wrapper {
 
-            background: transparent;
+            width: 100%;
+
+            max-width: 100%;
         }
 
 
-        /* =========================================================
-           RESPONSIVE
-        ========================================================== */
+        /* =====================================================
+           RESPONSIVE TABLES
+        ====================================================== */
+
+        .table-responsive {
+
+            width: 100%;
+
+            max-width: 100%;
+
+            overflow-x: auto;
+
+            -webkit-overflow-scrolling: touch;
+        }
+
+
+        /* =====================================================
+           IMAGES
+        ====================================================== */
+
+        .main-content img {
+
+            max-width: 100%;
+
+            height: auto;
+        }
+
+
+        /* =====================================================
+           FORMS
+        ====================================================== */
+
+        .main-content input,
+        .main-content select,
+        .main-content textarea {
+
+            max-width: 100%;
+        }
+
+
+        /* =====================================================
+           CARDS
+        ====================================================== */
+
+        .main-content .card {
+
+            max-width: 100%;
+        }
+
+
+        /* =====================================================
+           900px
+        ====================================================== */
 
         @media (max-width: 900px) {
 
@@ -716,10 +851,16 @@
                 width: 220px;
             }
 
+
             .main-content {
 
                 margin-left: 220px;
+
+                width: calc(100% - 220px);
+
+                padding: 20px;
             }
+
 
             .topbar-search input {
 
@@ -728,33 +869,270 @@
         }
 
 
+        /* =====================================================
+           MOBILE 700px
+        ====================================================== */
+
         @media (max-width: 700px) {
+
+            html,
+            body {
+
+                width: 100%;
+
+                max-width: 100%;
+
+                overflow-x: hidden;
+            }
+
+
+            /* TOPBAR */
 
             .topbar {
 
-                padding: 0 15px;
+                height: 64px;
+
+                padding: 0 12px;
             }
+
+
+            .topbar .logo {
+
+                font-size: 1.1rem;
+            }
+
+
+            .mobile-menu-btn {
+
+                display: flex;
+            }
+
+
+            .topbar-right {
+
+                gap: 3px;
+            }
+
 
             .topbar-search {
 
                 display: none;
             }
 
-            .topbar-right {
 
-                gap: 8px;
+            .topbar-icon-btn {
+
+                width: 36px;
+
+                height: 36px;
             }
+
+
+            .topbar-avatar {
+
+                width: 34px;
+
+                height: 34px;
+            }
+
+
+            /* SIDEBAR */
 
             .sidebar {
 
-                width: 220px;
+                top: 64px;
+
+                left: -270px;
+
+                width: 260px;
+
+                height: calc(100vh - 64px);
+
+                padding: 20px 14px;
+
+                z-index: 1100;
             }
+
+
+            .sidebar.mobile-open {
+
+                left: 0;
+            }
+
+
+            /* OVERLAY */
+
+            .sidebar-overlay.mobile-open {
+
+                display: block;
+            }
+
+
+            /* MAIN CONTENT */
 
             .main-content {
 
-                margin-left: 220px;
+                margin-left: 0 !important;
 
-                padding: 18px;
+                margin-top: 64px;
+
+                width: 100% !important;
+
+                max-width: 100%;
+
+                padding: 16px 12px;
+
+                min-height: calc(100vh - 64px);
+
+                overflow-x: hidden;
+            }
+
+
+            .page-wrapper {
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+
+                overflow-x: hidden;
+            }
+
+
+            /* BOOTSTRAP ROW */
+
+            .main-content .row {
+
+                width: 100%;
+
+                max-width: 100%;
+
+                margin-left: 0;
+
+                margin-right: 0;
+            }
+
+
+            .main-content .row > * {
+
+                padding-left: 6px;
+
+                padding-right: 6px;
+            }
+
+
+            /* CARDS */
+
+            .main-content .card {
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+            }
+
+
+            /* HERO */
+
+            .hero-card,
+            .welcome-card {
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+            }
+
+
+            /* TABLE */
+
+            .table-responsive {
+
+                width: 100%;
+
+                max-width: 100%;
+
+                overflow-x: auto;
+            }
+
+
+            .table {
+
+                min-width: 650px;
+            }
+
+
+            /* BUTTONS */
+
+            .main-content .btn {
+
+                max-width: 100%;
+
+                white-space: nowrap;
+            }
+
+
+            /* MODALS */
+
+            .modal-dialog {
+
+                margin: 10px;
+            }
+
+
+            /* DROPDOWN */
+
+            .dropdown-menu {
+
+                max-width: calc(100vw - 20px);
+            }
+        }
+
+
+        /* =====================================================
+           VERY SMALL PHONES
+        ====================================================== */
+
+        @media (max-width: 400px) {
+
+            .topbar {
+
+                padding: 0 8px;
+            }
+
+
+            .topbar .logo {
+
+                font-size: 1rem;
+            }
+
+
+            .topbar-icon-btn {
+
+                width: 34px;
+
+                height: 34px;
+            }
+
+
+            .topbar-avatar {
+
+                width: 32px;
+
+                height: 32px;
+
+                font-size: 0.8rem;
+            }
+
+
+            .main-content {
+
+                padding: 12px 8px;
+            }
+
+
+            .sidebar {
+
+                width: 250px;
+
+                left: -260px;
             }
         }
 
@@ -766,834 +1144,969 @@
 <body>
 
 
-@php
+    <!-- =====================================================
+         GLOBAL NOTIFICATION COUNTS
+    ====================================================== -->
 
-    /*
-    |--------------------------------------------------------------------------
-    | GLOBAL NOTIFICATION COUNTS
-    |--------------------------------------------------------------------------
-    |
-    | IMPORTANT:
-    | These values are calculated here so they are available on EVERY
-    | page that uses app.blade.php.
-    |
-    */
-
-
-    $pendingAppointments = 0;
-    $completedAppointments = 0;
-    $todayAppointments = 0;
-
-    $unpaidBilling = 0;
-
-    $lowStock = 0;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | APPOINTMENTS
-    |--------------------------------------------------------------------------
-    */
-
-    try {
-
-        if (\Illuminate\Support\Facades\Schema::hasTable('appointments')) {
-
-            $appointmentQuery =
-                \Illuminate\Support\Facades\DB::table('appointments');
-
-
-            /*
-            | Pending
-            */
-
-            if (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'appointments',
-                    'status'
-                )
-            ) {
-
-                $pendingAppointments =
-                    (clone $appointmentQuery)
-                    ->whereRaw('LOWER(status) = ?', ['pending'])
-                    ->count();
-
-
-                /*
-                | Completed
-                */
-
-                $completedAppointments =
-                    (clone $appointmentQuery)
-                    ->whereRaw('LOWER(status) = ?', ['completed'])
-                    ->count();
-
-            }
-
-
-            /*
-            | Today's appointments
-            */
-
-            if (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'appointments',
-                    'appointment_date'
-                )
-            ) {
-
-                $todayAppointments =
-                    (clone $appointmentQuery)
-                    ->whereDate(
-                        'appointment_date',
-                        now()->toDateString()
-                    )
-                    ->count();
-
-            }
-
-        }
-
-    } catch (\Throwable $e) {
+    @php
 
         $pendingAppointments = 0;
-
         $completedAppointments = 0;
-
         $todayAppointments = 0;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BILLING
-    |--------------------------------------------------------------------------
-    */
-
-    try {
-
-        if (\Illuminate\Support\Facades\Schema::hasTable('billings')) {
-
-            $billingQuery =
-                \Illuminate\Support\Facades\DB::table('billings');
-
-
-            if (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'billings',
-                    'payment_status'
-                )
-            ) {
-
-                $unpaidBilling =
-                    (clone $billingQuery)
-                    ->whereRaw(
-                        'LOWER(payment_status) = ?',
-                        ['unpaid']
-                    )
-                    ->count();
-
-            } elseif (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'billings',
-                    'status'
-                )
-            ) {
-
-                $unpaidBilling =
-                    (clone $billingQuery)
-                    ->whereRaw(
-                        'LOWER(status) = ?',
-                        ['unpaid']
-                    )
-                    ->count();
-
-            }
-
-        }
-
-    } catch (\Throwable $e) {
 
         $unpaidBilling = 0;
-    }
+
+        $lowStock = 0;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | INVENTORY
-    |--------------------------------------------------------------------------
-    |
-    | Low-stock threshold = 10
-    |
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | APPOINTMENTS
+        |--------------------------------------------------------------------------
+        */
 
-    try {
+        try {
 
-        if (\Illuminate\Support\Facades\Schema::hasTable('inventories')) {
+            if (\Illuminate\Support\Facades\Schema::hasTable('appointments')) {
 
-            $inventoryQuery =
-                \Illuminate\Support\Facades\DB::table('inventories');
+                $appointmentQuery =
+                    \Illuminate\Support\Facades\DB::table('appointments');
 
 
-            if (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'inventories',
-                    'stock'
-                )
-            ) {
+                if (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'appointments',
+                        'status'
+                    )
+                ) {
 
-                $lowStock =
-                    (clone $inventoryQuery)
-                    ->where('stock', '<=', 10)
-                    ->count();
+                    $pendingAppointments =
+                        (clone $appointmentQuery)
+                        ->whereRaw(
+                            'LOWER(status) = ?',
+                            ['pending']
+                        )
+                        ->count();
 
-            } elseif (
-                \Illuminate\Support\Facades\Schema::hasColumn(
-                    'inventories',
-                    'quantity'
-                )
-            ) {
 
-                $lowStock =
-                    (clone $inventoryQuery)
-                    ->where('quantity', '<=', 10)
-                    ->count();
+                    $completedAppointments =
+                        (clone $appointmentQuery)
+                        ->whereRaw(
+                            'LOWER(status) = ?',
+                            ['completed']
+                        )
+                        ->count();
+                }
+
+
+                if (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'appointments',
+                        'appointment_date'
+                    )
+                ) {
+
+                    $todayAppointments =
+                        (clone $appointmentQuery)
+                        ->whereDate(
+                            'appointment_date',
+                            now()->toDateString()
+                        )
+                        ->count();
+                }
 
             }
 
+        } catch (\Throwable $e) {
+
+            $pendingAppointments = 0;
+
+            $completedAppointments = 0;
+
+            $todayAppointments = 0;
         }
 
-    } catch (\Throwable $e) {
 
-        $lowStock = 0;
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | BILLING
+        |--------------------------------------------------------------------------
+        */
 
+        try {
 
-    /*
-    |--------------------------------------------------------------------------
-    | TOTAL NOTIFICATIONS
-    |--------------------------------------------------------------------------
-    */
+            if (\Illuminate\Support\Facades\Schema::hasTable('billings')) {
 
-    $totalNotifications =
-        $todayAppointments
-        + $lowStock
-        + $unpaidBilling;
-
-@endphp
+                $billingQuery =
+                    \Illuminate\Support\Facades\DB::table('billings');
 
 
+                if (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'billings',
+                        'payment_status'
+                    )
+                ) {
 
-<!-- =========================================================
-     TOP BAR
-========================================================= -->
+                    $unpaidBilling =
+                        (clone $billingQuery)
+                        ->whereRaw(
+                            'LOWER(payment_status) = ?',
+                            ['unpaid']
+                        )
+                        ->count();
 
-<div class="topbar">
+                } elseif (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'billings',
+                        'status'
+                    )
+                ) {
+
+                    $unpaidBilling =
+                        (clone $billingQuery)
+                        ->whereRaw(
+                            'LOWER(status) = ?',
+                            ['unpaid']
+                        )
+                        ->count();
+                }
+
+            }
+
+        } catch (\Throwable $e) {
+
+            $unpaidBilling = 0;
+        }
 
 
-    <!-- LOGO -->
+        /*
+        |--------------------------------------------------------------------------
+        | INVENTORY
+        |--------------------------------------------------------------------------
+        */
 
-    <div class="logo">
+        try {
 
-        <i class="bi bi-eyeglasses me-2"></i>
+            if (
+                \Illuminate\Support\Facades\Schema::hasTable('inventories')
+            ) {
 
-        OptiCare
-
-    </div>
-
-
-
-    <div class="topbar-right">
+                $inventoryQuery =
+                    \Illuminate\Support\Facades\DB::table('inventories');
 
 
-        <!-- =====================================================
-             SEARCH
-        ====================================================== -->
+                if (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'inventories',
+                        'stock'
+                    )
+                ) {
 
-        <form
-            action="{{ route('search') }}"
-            method="GET"
-            class="topbar-search"
+                    $lowStock =
+                        (clone $inventoryQuery)
+                        ->where('stock', '<=', 10)
+                        ->count();
+
+                } elseif (
+                    \Illuminate\Support\Facades\Schema::hasColumn(
+                        'inventories',
+                        'quantity'
+                    )
+                ) {
+
+                    $lowStock =
+                        (clone $inventoryQuery)
+                        ->where('quantity', '<=', 10)
+                        ->count();
+                }
+            }
+
+        } catch (\Throwable $e) {
+
+            $lowStock = 0;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL NOTIFICATIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $totalNotifications =
+            $todayAppointments
+            + $lowStock
+            + $unpaidBilling;
+
+    @endphp
+
+
+
+    <!-- =====================================================
+         TOPBAR
+    ====================================================== -->
+
+    <header class="topbar">
+
+
+        <div class="d-flex align-items-center gap-2">
+
+
+            <!-- MOBILE MENU -->
+
+            <button
+                type="button"
+                class="mobile-menu-btn"
+                id="mobileMenuButton"
+                aria-label="Open menu"
+            >
+
+                <i class="bi bi-list"></i>
+
+            </button>
+
+
+            <!-- LOGO -->
+
+            <div class="logo">
+
+                <i class="bi bi-eyeglasses me-2"></i>
+
+                OptiCare
+
+            </div>
+
+        </div>
+
+
+
+        <div class="topbar-right">
+
+
+            <!-- =================================================
+                 SEARCH
+            ================================================== -->
+
+            <form
+                action="{{ route('search') }}"
+                method="GET"
+                class="topbar-search"
+            >
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search anything..."
+                    value="{{ request('search') }}"
+                >
+
+            </form>
+
+
+
+            <!-- =================================================
+                 NOTIFICATIONS
+            ================================================== -->
+
+            <div class="dropdown notification-wrapper">
+
+                <a
+                    href="#"
+                    class="topbar-icon-btn"
+                    id="notificationDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Notifications"
+                >
+
+                    <i class="bi bi-bell-fill"></i>
+
+
+                    @if($totalNotifications > 0)
+
+                        <span class="notification-badge">
+
+                            {{
+                                $totalNotifications > 99
+                                ? '99+'
+                                : $totalNotifications
+                            }}
+
+                        </span>
+
+                    @endif
+
+                </a>
+
+
+
+                <ul
+                    class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
+                    aria-labelledby="notificationDropdown"
+                >
+
+                    <li>
+
+                        <h6 class="dropdown-header fw-bold">
+
+                            Notifications
+
+                        </h6>
+
+                    </li>
+
+
+
+                    <!-- TODAY -->
+
+                    <li>
+
+                        <a
+                            class="dropdown-item notification-item"
+                            href="{{ route('appointments.index') }}"
+                        >
+
+                            <span class="notification-item-left">
+
+                                <i
+                                    class="bi bi-calendar-check"
+                                    style="color: var(--oc-gold);"
+                                ></i>
+
+                                Today's Appointments
+
+                            </span>
+
+
+                            <span class="notification-count warning">
+
+                                {{ $todayAppointments }}
+
+                            </span>
+
+                        </a>
+
+                    </li>
+
+
+
+                    <!-- LOW STOCK -->
+
+                    <li>
+
+                        <a
+                            class="dropdown-item notification-item"
+                            href="{{ route('inventory.index') }}"
+                        >
+
+                            <span class="notification-item-left">
+
+                                <i
+                                    class="bi bi-box-seam"
+                                    style="color: var(--oc-terracotta);"
+                                ></i>
+
+                                Low Stock
+
+                            </span>
+
+
+                            <span class="notification-count danger">
+
+                                {{ $lowStock }}
+
+                            </span>
+
+                        </a>
+
+                    </li>
+
+
+
+                    <!-- UNPAID -->
+
+                    <li>
+
+                        <a
+                            class="dropdown-item notification-item"
+                            href="{{ route('billing.index') }}"
+                        >
+
+                            <span class="notification-item-left">
+
+                                <i
+                                    class="bi bi-receipt"
+                                    style="color: var(--oc-terracotta);"
+                                ></i>
+
+                                Unpaid Billing
+
+                            </span>
+
+
+                            <span class="notification-count danger">
+
+                                {{ $unpaidBilling }}
+
+                            </span>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 USER
+            ================================================== -->
+
+            <div class="dropdown">
+
+                <a
+                    href="#"
+                    class="topbar-avatar"
+                    id="userDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                >
+
+                    {{
+                        strtoupper(
+                            substr(
+                                session('user_name', 'A'),
+                                0,
+                                1
+                            )
+                        )
+                    }}
+
+                </a>
+
+
+                <ul
+                    class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
+                    aria-labelledby="userDropdown"
+                >
+
+                    <li>
+
+                        <h6 class="dropdown-header">
+
+                            {{ session('user_name', 'Admin') }}
+
+                        </h6>
+
+                    </li>
+
+
+                    <li>
+
+                        <a
+                            class="dropdown-item"
+                            href="{{ route('profile.edit') }}"
+                        >
+
+                            <i class="bi bi-person-gear me-2"></i>
+
+                            Account Settings
+
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <hr class="dropdown-divider">
+
+                    </li>
+
+
+                    <li>
+
+                        <form
+                            action="{{ route('logout') }}"
+                            method="POST"
+                        >
+
+                            @csrf
+
+                            <button
+                                type="submit"
+                                class="dropdown-item text-danger"
+                            >
+
+                                <i class="bi bi-box-arrow-right me-2"></i>
+
+                                Logout
+
+                            </button>
+
+                        </form>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         SIDEBAR OVERLAY
+    ====================================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
+
+
+        <!-- SIDEBAR HEADER -->
+
+        <div class="sidebar-header">
+
+            <i class="bi bi-eyeglasses me-2"></i>
+
+            <span>OptiCare</span>
+
+            <small>Clinic Menu</small>
+
+        </div>
+
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <a
+            href="{{ route('dashboard') }}"
+            class="sidebar-link
+            {{ request()->routeIs('dashboard') ? 'active' : '' }}"
         >
 
-            <i class="bi bi-search"></i>
+            <i class="bi bi-speedometer2 me-2"></i>
 
-            <input
-                type="text"
-                name="search"
-                placeholder="Search anything..."
-                value="{{ request('search') }}"
-            >
+            Dashboard
 
-        </form>
+        </a>
 
 
 
-        <!-- =====================================================
-             NOTIFICATIONS
-        ====================================================== -->
+        <!-- =================================================
+             PATIENTS
+        ================================================== -->
 
-        <div class="dropdown notification-wrapper">
+        <a
+            href="{{ route('patients.index') }}"
+            class="sidebar-link
+            {{ request()->routeIs('patients.*') ? 'active' : '' }}"
+        >
 
+            <i class="bi bi-person-lines-fill me-2"></i>
 
-            <a
-                href="#"
-                class="topbar-icon-btn"
-                id="notificationDropdown"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                title="Notifications"
-            >
+            Patients
 
-                <i class="bi bi-bell-fill"></i>
+        </a>
 
 
-                @if($totalNotifications > 0)
 
-                    <span class="notification-badge">
+        <!-- =================================================
+             APPOINTMENTS
+        ================================================== -->
 
-                        {{ $totalNotifications > 99
-                            ? '99+'
-                            : $totalNotifications
-                        }}
+        <a
+            href="{{ route('appointments.index') }}"
+            class="sidebar-link
+            {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-calendar-check me-2"></i>
+
+            <span>Appointments</span>
+
+            <div class="ms-auto d-flex align-items-center gap-1">
+
+                @if(($pendingAppointments ?? 0) > 0)
+
+                    <span
+                        class="badge bg-warning rounded-pill"
+                        title="Pending Appointments"
+                    >
+
+                        {{ $pendingAppointments }}
 
                     </span>
 
                 @endif
 
-            </a>
 
+                @if(($completedAppointments ?? 0) > 0)
 
-
-            <!-- NOTIFICATION DROPDOWN -->
-
-            <ul
-                class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
-                aria-labelledby="notificationDropdown"
-            >
-
-
-                <li>
-
-                    <h6 class="dropdown-header fw-bold">
-
-                        Notifications
-
-                    </h6>
-
-                </li>
-
-
-
-                <!-- TODAY'S APPOINTMENTS -->
-
-                <li>
-
-                    <a
-                        class="dropdown-item notification-item"
-                        href="{{ route('appointments.index') }}"
+                    <span
+                        class="badge bg-success rounded-pill"
+                        title="Completed Appointments"
                     >
 
-                        <span class="notification-item-left">
+                        {{ $completedAppointments }}
 
-                            <i
-                                class="bi bi-calendar-check"
-                                style="color: var(--oc-gold);"
-                            ></i>
+                    </span>
 
-                            Today's Appointments
+                @endif
 
-                        </span>
+            </div>
 
-
-                        <span class="notification-count warning">
-
-                            {{ $todayAppointments }}
-
-                        </span>
-
-                    </a>
-
-                </li>
+        </a>
 
 
 
-                <!-- LOW STOCK -->
+        <!-- =================================================
+             BILLING
+        ================================================== -->
 
-                <li>
+        <a
+            href="{{ route('billing.index') }}"
+            class="sidebar-link
+            {{ request()->routeIs('billing.*') ? 'active' : '' }}"
+        >
 
-                    <a
-                        class="dropdown-item notification-item"
-                        href="{{ route('inventory.index') }}"
-                    >
+            <i class="bi bi-receipt me-2"></i>
 
-                        <span class="notification-item-left">
-
-                            <i
-                                class="bi bi-box-seam"
-                                style="color: var(--oc-terracotta);"
-                            ></i>
-
-                            Low Stock
-
-                        </span>
+            <span>Billing</span>
 
 
-                        <span class="notification-count danger">
+            @if($unpaidBilling > 0)
 
-                            {{ $lowStock }}
+                <span class="badge bg-danger">
 
-                        </span>
+                    {{ $unpaidBilling }}
 
-                    </a>
+                </span>
 
-                </li>
+            @endif
+
+        </a>
 
 
 
-                <!-- UNPAID BILLING -->
+        <!-- =================================================
+             INVENTORY
+        ================================================== -->
 
-                <li>
+        <a
+            href="{{ route('inventory.index') }}"
+            class="sidebar-link
+            {{ request()->routeIs('inventory.*') ? 'active' : '' }}"
+        >
 
-                    <a
-                        class="dropdown-item notification-item"
-                        href="{{ route('billing.index') }}"
-                    >
+            <i class="bi bi-box-seam me-2"></i>
 
-                        <span class="notification-item-left">
-
-                            <i
-                                class="bi bi-receipt"
-                                style="color: var(--oc-terracotta);"
-                            ></i>
-
-                            Unpaid Billing
-
-                        </span>
+            <span>Inventory</span>
 
 
-                        <span class="notification-count danger">
+            @if($lowStock > 0)
 
-                            {{ $unpaidBilling }}
+                <span class="badge bg-danger">
 
-                        </span>
+                    {{ $lowStock }}
 
-                    </a>
+                </span>
 
-                </li>
+            @endif
 
-
-            </ul>
-
-        </div>
+        </a>
 
 
 
-        <!-- =====================================================
-             USER DROPDOWN
-        ====================================================== -->
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
 
-        <div class="dropdown">
+        <a
+            href="{{ route('reports.index') }}"
+            class="sidebar-link
+            {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+        >
 
+            <i class="bi bi-graph-up me-2"></i>
+
+            Reports
+
+        </a>
+
+
+
+        <hr class="sidebar-divider">
+
+
+
+        <!-- =================================================
+             UTILITIES
+        ================================================== -->
+
+        <a
+            href="#utilitiesMenu"
+            class="sidebar-link"
+            data-bs-toggle="collapse"
+            role="button"
+            aria-expanded="{{
+                request()->routeIs([
+                    'users.*',
+                    'archive.*',
+                    'backup.*'
+                ])
+                ? 'true'
+                : 'false'
+            }}"
+        >
+
+            <i class="bi bi-tools me-2"></i>
+
+            Utilities
+
+            <i class="bi bi-chevron-down ms-auto small"></i>
+
+        </a>
+
+
+
+        <div
+            class="collapse
+            {{
+                request()->routeIs([
+                    'users.*',
+                    'archive.*',
+                    'backup.*'
+                ])
+                ? 'show'
+                : ''
+            }}"
+            id="utilitiesMenu"
+        >
+
+
+            <!-- USER MANAGEMENT -->
 
             <a
-                href="#"
-                class="topbar-avatar"
-                id="userDropdown"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+                href="{{ route('users.index') }}"
+                class="sidebar-sublink
+                {{ request()->routeIs('users.*') ? 'active' : '' }}"
             >
 
-                {{ strtoupper(
-                    substr(
-                        session('user_name', 'A'),
-                        0,
-                        1
-                    )
-                ) }}
+                <i class="bi bi-people me-2"></i>
+
+                User Management
 
             </a>
 
 
 
-            <ul
-                class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
-                aria-labelledby="userDropdown"
+            <!-- ARCHIVE -->
+
+            <a
+                href="{{ route('archive.index') }}"
+                class="sidebar-sublink
+                {{ request()->routeIs('archive.*') ? 'active' : '' }}"
             >
 
+                <i class="bi bi-archive me-2"></i>
 
-                <li>
+                Archive
 
-                    <h6 class="dropdown-header">
-
-                        {{ session('user_name', 'Admin') }}
-
-                    </h6>
-
-                </li>
+            </a>
 
 
 
-                <li>
+            <!-- BACKUP -->
 
-                    <a
-                        class="dropdown-item"
-                        href="{{ route('profile.edit') }}"
-                    >
+            <a
+                href="{{ route('backup.index') }}"
+                class="sidebar-sublink
+                {{ request()->routeIs('backup.*') ? 'active' : '' }}"
+            >
 
-                        <i class="bi bi-person-gear me-2"></i>
+                <i class="bi bi-hdd-stack me-2"></i>
 
-                        Account Settings
+                Database Backup
 
-                    </a>
-
-                </li>
-
-
-
-                <li>
-
-                    <hr class="dropdown-divider">
-
-                </li>
-
-
-
-                <li>
-
-                    <form
-                        action="{{ route('logout') }}"
-                        method="POST"
-                    >
-
-                        @csrf
-
-                        <button
-                            type="submit"
-                            class="dropdown-item text-danger"
-                        >
-
-                            <i class="bi bi-box-arrow-right me-2"></i>
-
-                            Logout
-
-                        </button>
-
-                    </form>
-
-                </li>
-
-
-            </ul>
+            </a>
 
         </div>
 
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
-
-<div class="sidebar">
-
-
-    <!-- SIDEBAR HEADER -->
-
-    <div class="sidebar-header">
-
-        <i class="bi bi-eyeglasses me-2"></i>
-
-        <span>OptiCare</span>
-
-        <small>Clinic Menu</small>
-
-    </div>
+    </aside>
 
 
 
     <!-- =====================================================
-         DASHBOARD
+         MAIN CONTENT
     ====================================================== -->
 
-    <a
-        href="{{ route('dashboard') }}"
-        class="sidebar-link
-        {{ request()->routeIs('dashboard') ? 'active' : '' }}"
-    >
+    <main class="main-content">
 
-        <i class="bi bi-speedometer2 me-2"></i>
+        <div class="page-wrapper">
 
-        Dashboard
+            @yield('content')
 
-    </a>
+        </div>
+
+    </main>
 
 
 
     <!-- =====================================================
-         PATIENTS
+         BOOTSTRAP JS
     ====================================================== -->
 
-    <a
-        href="{{ route('patients.index') }}"
-        class="sidebar-link
-        {{ request()->routeIs('patients.*') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-person-lines-fill me-2"></i>
-
-        Patients
-
-    </a>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    ></script>
 
 
 
     <!-- =====================================================
-         APPOINTMENTS
+         MOBILE SIDEBAR SCRIPT
     ====================================================== -->
 
-    <!-- APPOINTMENTS -->
-<a
-    href="{{ route('appointments.index') }}"
-    class="sidebar-link {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
->
-    <i class="bi bi-calendar-check me-2"></i>
+    <script>
 
-    <span>Appointments</span>
+        document.addEventListener('DOMContentLoaded', function () {
 
-    <div class="ms-auto d-flex align-items-center gap-1">
+            const sidebar =
+                document.getElementById('sidebar');
 
-        {{-- Pending --}}
-        @if(($pendingAppointments ?? 0) > 0)
-            <span
-                class="badge bg-warning rounded-pill"
-                title="Pending Appointments"
-            >
-                {{ $pendingAppointments }}
-            </span>
-        @endif
+            const menuButton =
+                document.getElementById('mobileMenuButton');
 
-        {{-- Completed --}}
-        @if(($completedAppointments ?? 0) > 0)
-            <span
-                class="badge bg-success rounded-pill"
-                title="Completed Appointments"
-            >
-                {{ $completedAppointments }}
-            </span>
-        @endif
+            const overlay =
+                document.getElementById('sidebarOverlay');
 
-    </div>
-</a>
 
+            function openSidebar() {
 
-    <!-- =====================================================
-         BILLING
-    ====================================================== -->
+                sidebar.classList.add('mobile-open');
 
-    <a
-        href="{{ route('billing.index') }}"
-        class="sidebar-link
-        {{ request()->routeIs('billing.*') ? 'active' : '' }}"
-    >
+                overlay.classList.add('mobile-open');
 
-        <i class="bi bi-receipt me-2"></i>
+                document.body.style.overflow = 'hidden';
+            }
 
-        Billing
 
+            function closeSidebar() {
 
-        @if($unpaidBilling > 0)
+                sidebar.classList.remove('mobile-open');
 
-            <span class="badge bg-danger">
+                overlay.classList.remove('mobile-open');
 
-                {{ $unpaidBilling }}
+                document.body.style.overflow = '';
+            }
 
-            </span>
 
-        @endif
+            if (menuButton) {
 
-    </a>
+                menuButton.addEventListener(
+                    'click',
+                    function () {
 
+                        if (
+                            sidebar.classList.contains(
+                                'mobile-open'
+                            )
+                        ) {
 
+                            closeSidebar();
 
-    <!-- =====================================================
-         INVENTORY
-    ====================================================== -->
+                        } else {
 
-    <a
-        href="{{ route('inventory.index') }}"
-        class="sidebar-link
-        {{ request()->routeIs('inventory.*') ? 'active' : '' }}"
-    >
+                            openSidebar();
+                        }
 
-        <i class="bi bi-box-seam me-2"></i>
+                    }
+                );
 
-        Inventory
+            }
 
 
-        @if($lowStock > 0)
+            if (overlay) {
 
-            <span class="badge bg-danger">
+                overlay.addEventListener(
+                    'click',
+                    closeSidebar
+                );
 
-                {{ $lowStock }}
+            }
 
-            </span>
 
-        @endif
+            /*
+            |--------------------------------------------------------------------------
+            | CLOSE MOBILE SIDEBAR AFTER CLICKING LINK
+            |--------------------------------------------------------------------------
+            */
 
-    </a>
+            document
+                .querySelectorAll('.sidebar a')
+                .forEach(function (link) {
 
+                    link.addEventListener(
+                        'click',
+                        function () {
 
+                            if (
+                                window.innerWidth <= 700
+                            ) {
 
-    <!-- =====================================================
-         REPORTS
-    ====================================================== -->
+                                closeSidebar();
+                            }
 
-    <a
-        href="{{ route('reports.index') }}"
-        class="sidebar-link
-        {{ request()->routeIs('reports.*') ? 'active' : '' }}"
-    >
+                        }
+                    );
 
-        <i class="bi bi-graph-up me-2"></i>
+                });
 
-        Reports
 
-    </a>
+            /*
+            |--------------------------------------------------------------------------
+            | RESET WHEN SCREEN BECOMES DESKTOP
+            |--------------------------------------------------------------------------
+            */
 
+            window.addEventListener(
+                'resize',
+                function () {
 
+                    if (window.innerWidth > 700) {
 
-    <hr class="sidebar-divider">
+                        closeSidebar();
+                    }
 
+                }
+            );
 
+        });
 
-    <!-- =====================================================
-         UTILITIES
-    ====================================================== -->
-
-    <a
-        href="#utilitiesMenu"
-        class="sidebar-link"
-        data-bs-toggle="collapse"
-        role="button"
-        aria-expanded="{{
-            request()->routeIs([
-                'users.*',
-                'archive.*',
-                'backup.*'
-            ])
-            ? 'true'
-            : 'false'
-        }}"
-    >
-
-        <i class="bi bi-tools me-2"></i>
-
-        Utilities
-
-        <i class="bi bi-chevron-down ms-auto small"></i>
-
-    </a>
-
-
-
-    <div
-        class="collapse
-        {{
-            request()->routeIs([
-                'users.*',
-                'archive.*',
-                'backup.*'
-            ])
-            ? 'show'
-            : ''
-        }}"
-        id="utilitiesMenu"
-    >
-
-
-        <!-- USER MANAGEMENT -->
-
-        <a
-            href="{{ route('users.index') }}"
-            class="sidebar-sublink
-            {{ request()->routeIs('users.*') ? 'active' : '' }}"
-        >
-
-            <i class="bi bi-people me-2"></i>
-
-            User Management
-
-        </a>
-
-
-
-        <!-- ARCHIVE -->
-
-        <a
-            href="{{ route('archive.index') }}"
-            class="sidebar-sublink
-            {{ request()->routeIs('archive.*') ? 'active' : '' }}"
-        >
-
-            <i class="bi bi-archive me-2"></i>
-
-            Archive
-
-        </a>
-
-
-
-        <!-- BACKUP -->
-
-        <a
-            href="{{ route('backup.index') }}"
-            class="sidebar-sublink
-            {{ request()->routeIs('backup.*') ? 'active' : '' }}"
-        >
-
-            <i class="bi bi-hdd-stack me-2"></i>
-
-            Database Backup
-
-        </a>
-
-
-    </div>
-
-
-</div>
-
-
-
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-
-<div class="main-content">
-
-    <div class="page-wrapper">
-
-        @yield('content')
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================================================
-     BOOTSTRAP JS
-========================================================= -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-></script>
+    </script>
 
 
 </body>
