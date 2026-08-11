@@ -2722,6 +2722,188 @@
 
     @stack('scripts')
 
+
+    <!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ==========================================
+    // APPOINTMENT NOTIFICATION SOUND
+    // ==========================================
+
+    const appointmentSound = new Audio(
+        "{{ asset('sounds/appointment-notification.mp3') }}"
+    );
+
+    appointmentSound.preload = 'auto';
+    appointmentSound.volume = 1.0;
+
+    // ==========================================
+    // ENABLE SOUND AFTER USER INTERACTION
+    // ==========================================
+
+    let soundEnabled = false;
+
+    function enableNotificationSound() {
+
+        if (soundEnabled) return;
+
+        appointmentSound.play()
+            .then(() => {
+                appointmentSound.pause();
+                appointmentSound.currentTime = 0;
+
+                soundEnabled = true;
+
+                console.log('Appointment notification sound enabled.');
+            })
+            .catch(error => {
+                console.log('Sound permission not yet granted.', error);
+            });
+    }
+
+    // User interaction allows browser to permit audio
+    document.addEventListener(
+        'click',
+        enableNotificationSound,
+        { once: true }
+    );
+
+    document.addEventListener(
+        'keydown',
+        enableNotificationSound,
+        { once: true }
+    );
+
+
+    // ==========================================
+    // PLAY NOTIFICATION SOUND
+    // ==========================================
+
+    window.playAppointmentNotificationSound = function () {
+
+        if (!soundEnabled) {
+            console.log('Notification sound is not enabled yet.');
+            return;
+        }
+
+        appointmentSound.currentTime = 0;
+
+        appointmentSound.play()
+            .then(() => {
+                console.log('Appointment notification sound played.');
+            })
+            .catch(error => {
+                console.error(
+                    'Unable to play appointment notification sound:',
+                    error
+                );
+            });
+    };
+
+
+    // ==========================================
+    // BROWSER NOTIFICATION
+    // ==========================================
+
+    window.showAppointmentNotification = function () {
+
+        if (!('Notification' in window)) {
+            console.log('Browser notifications are not supported.');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+
+            new Notification('OptiCare - New Appointment', {
+                body: 'A new online appointment has been booked.',
+                icon: "{{ asset('favicon.ico') }}"
+            });
+
+            // Play custom MP3
+            window.playAppointmentNotificationSound();
+
+        }
+
+        else if (Notification.permission !== 'denied') {
+
+            Notification.requestPermission()
+                .then(permission => {
+
+                    if (permission === 'granted') {
+
+                        new Notification(
+                            'OptiCare - New Appointment',
+                            {
+                                body: 'A new online appointment has been booked.',
+                                icon: "{{ asset('favicon.ico') }}"
+                            }
+                        );
+
+                        window.playAppointmentNotificationSound();
+                    }
+
+                });
+
+        }
+
+    };
+
+
+    // ==========================================
+    // CHECK FOR NEW APPOINTMENTS
+    // ==========================================
+
+    let lastAppointmentCount =
+        parseInt(
+            localStorage.getItem('opticare_appointment_count') || '0'
+        );
+
+
+    async function checkForNewAppointments() {
+
+        try {
+
+            const response = await fetch(
+                "{{ route('appointments.index') }}",
+                {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            // We don't rely on HTML parsing here.
+            // The notification system can be triggered
+            // by your existing appointment notification logic.
+
+        } catch (error) {
+
+            console.log(
+                'Appointment notification check failed:',
+                error
+            );
+
+        }
+
+    }
+
+
+    // Check periodically
+    setInterval(
+        checkForNewAppointments,
+        10000
+    );
+
+});
+</script>
+
 </body>
 
 </html>
