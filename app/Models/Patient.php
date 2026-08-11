@@ -18,16 +18,17 @@ class Patient extends Model
         'eye_grade',
     ];
 
-    // One patient can have many appointments
     public function appointments()
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(
+            Appointment::class
+        );
     }
 
-    // Added: one patient can have many billing records --
-    // useful for a patient detail page or reports later.
     public function billings()
     {
-        return $this->hasMany(Billing::class);
+        return $this->hasMany(
+            Billing::class
+        );
     }
 }

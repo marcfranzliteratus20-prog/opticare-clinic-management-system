@@ -31,8 +31,13 @@ class BookingController extends Controller
             'appointment_time' => 'required',
         ]);
 
-        // Reuse existing patient if contact number already exists
-        $patient = Patient::firstOrCreate(
+        /*
+        |--------------------------------------------------------------------------
+        | FIND OR CREATE PATIENT
+        |--------------------------------------------------------------------------
+        */
+
+        $patient = Patient::updateOrCreate(
             [
                 'contact_number' => $validated['contact_number'],
             ],
@@ -44,7 +49,13 @@ class BookingController extends Controller
             ]
         );
 
-        Appointment::create([
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE APPOINTMENT
+        |--------------------------------------------------------------------------
+        */
+
+        $appointment = Appointment::create([
             'patient_id' => $patient->id,
             'appointment_date' => $validated['appointment_date'],
             'appointment_time' => $validated['appointment_time'],
@@ -54,12 +65,20 @@ class BookingController extends Controller
             'source' => 'Online',
         ]);
 
-        return redirect()->route('booking.create')->with(
-            'success',
-            'Your appointment request has been submitted! Our staff will contact you at '
-            . $validated['contact_number'] .
-            ' to confirm your schedule.'
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('booking.create')
+            ->with(
+                'success',
+                'Your appointment request has been submitted! Our staff will contact you at '
+                . $validated['contact_number']
+                . ' to confirm your schedule.'
+            );
     }
 
     public function showStatusForm()
@@ -73,10 +92,16 @@ class BookingController extends Controller
             'contact_number' => 'required|string|max:20',
         ]);
 
-        $patient = Patient::where('contact_number', $validated['contact_number'])->first();
+        $patient = Patient::where(
+            'contact_number',
+            $validated['contact_number']
+        )->first();
 
         $appointments = $patient
-            ? $patient->appointments()->latest('appointment_date')->get()
+            ? $patient->appointments()
+                ->latest('appointment_date')
+                ->latest('appointment_time')
+                ->get()
             : collect();
 
         return view('public.check-status', [

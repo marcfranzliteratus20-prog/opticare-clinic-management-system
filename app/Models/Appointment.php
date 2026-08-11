@@ -16,12 +16,13 @@ class Appointment extends Model
         'doctor_name',
         'type',
         'status',
-        'source'
+        'source',
     ];
 
-    // Each appointment belongs to one patient
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(
+            Patient::class
+        );
     }
 }
