@@ -31,7 +31,7 @@
                     <select name="patient_id" required>
                         @foreach($patients as $patient)
                             <option value="{{ $patient->id }}"
-                                {{ $appointment->patient_id == $patient->id ? 'selected' : '' }}>
+                                {{ old('patient_id', $appointment->patient_id) == $patient->id ? 'selected' : '' }}>
                                 {{ $patient->full_name }}
                             </option>
                         @endforeach
@@ -41,7 +41,20 @@
                 <div class="oc-field">
                     <label>Appointment Type</label>
                     <select name="type" required>
-                        @foreach(['New Checkup', 'Follow-up', 'Frame Fitting', 'Contact Lens Fitting'] as $t)
+                        @php
+                            $types = [
+                                'Comprehensive Eye Examination',
+                                'Prescription Eyeglasses',
+                                'Contact Lens Fitting and Assessment',
+                                'Ishihara Color Vision Test',
+                                'Eye Condition Certification',
+                                'Eyewear Accessories',
+                                'Eyewear Repair and Maintenance',
+                                'Frame Fitting',
+                                'Other'
+                            ];
+                        @endphp
+                        @foreach($types as $t)
                             <option value="{{ $t }}" {{ old('type', $appointment->type) == $t ? 'selected' : '' }}>{{ $t }}</option>
                         @endforeach
                     </select>
@@ -69,7 +82,7 @@
                     <label>Status</label>
                     <select name="status">
                         @foreach(['Pending', 'Completed', 'Cancelled'] as $status)
-                            <option value="{{ $status }}" {{ $appointment->status == $status ? 'selected' : '' }}>
+                            <option value="{{ $status }}" {{ old('status', $appointment->status) == $status ? 'selected' : '' }}>
                                 {{ $status }}
                             </option>
                         @endforeach

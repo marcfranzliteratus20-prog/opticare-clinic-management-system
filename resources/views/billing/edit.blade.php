@@ -17,7 +17,8 @@
 
             @if($errors->any())
                 <div class="oc-alert oc-alert-danger">
-                    <ul class="mb-0">
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-2">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -34,7 +35,7 @@
                     <select name="patient_id" required>
                         @foreach($patients as $patient)
                             <option value="{{ $patient->id }}"
-                                {{ $billing->patient_id == $patient->id ? 'selected' : '' }}>
+                                {{ old('patient_id', $billing->patient_id) == $patient->id ? 'selected' : '' }}>
                                 {{ $patient->full_name }}
                             </option>
                         @endforeach
@@ -49,8 +50,27 @@
 
                 <div class="oc-field">
                     <label>Service Type</label>
-                    <input type="text" name="service_type"
-                           value="{{ old('service_type', $billing->service_type) }}" required>
+                    <select name="service_type" required>
+                        @php
+                            $services = [
+                                'Comprehensive Eye Examination',
+                                'Prescription Eyeglasses',
+                                'Contact Lens Fitting and Assessment',
+                                'Ishihara Color Vision Test',
+                                'Eye Condition Certification',
+                                'Eyewear Accessories',
+                                'Eyewear Repair and Maintenance',
+                                'Frame Fitting',
+                                'Other'
+                            ];
+                        @endphp
+                        @foreach($services as $service)
+                            <option value="{{ $service }}" 
+                                {{ old('service_type', $billing->service_type) == $service ? 'selected' : '' }}>
+                                {{ $service }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="oc-field">
@@ -61,7 +81,7 @@
                            value="{{ old('warranty_months', $billing->warranty_months) }}">
                     @if($billing->warranty_expiry)
                         <small class="oc-optional d-block mt-1">
-                            Current coverage until {{ $billing->warranty_expiry->format('M d, Y') }}
+                            Current coverage until {{ \Carbon\Carbon::parse($billing->warranty_expiry)->format('M d, Y') }}
                         </small>
                     @endif
                 </div>
@@ -69,8 +89,12 @@
                 <div class="oc-field">
                     <label>Payment Status</label>
                     <select name="payment_status" required>
-                        <option value="Unpaid" {{ $billing->payment_status == 'Unpaid' ? 'selected' : '' }}>Unpaid</option>
-                        <option value="Paid" {{ $billing->payment_status == 'Paid' ? 'selected' : '' }}>Paid</option>
+                        @foreach(['Unpaid', 'Paid', 'Partial'] as $status)
+                            <option value="{{ $status }}" 
+                                {{ old('payment_status', $billing->payment_status) == $status ? 'selected' : '' }}>
+                                {{ $status }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
