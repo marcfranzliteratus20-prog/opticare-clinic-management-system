@@ -244,26 +244,17 @@ Route::middleware('check.login')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | INVENTORY
+        | INVENTORY (Admin-only write operations)
+        |--------------------------------------------------------------------------
+        | create, store, edit, update, destroy are Admin-only.
+        | index, show, adjust, history, and export are shared with Staff
+        | (registered below in the Admin+Staff group).
         |--------------------------------------------------------------------------
         */
 
-        Route::resource('inventory', InventoryController::class);
-
-        Route::put(
-            '/inventory/{inventory}/adjust',
-            [InventoryController::class, 'adjustStock']
-        )->name('inventory.adjust');
-
-        Route::get(
-            '/inventory-history',
-            [InventoryController::class, 'stockHistory']
-        )->name('inventory.history');
-
-        Route::get(
-            '/inventory-export',
-            [InventoryController::class, 'exportCsv']
-        )->name('inventory.export');
+        Route::resource('inventory', InventoryController::class, [
+            'only' => ['create', 'store', 'edit', 'update', 'destroy'],
+        ]);
 
 
         /*
@@ -406,6 +397,36 @@ Route::middleware('check.login')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
+        | INVENTORY (Admin + Staff read / stock-adjust / history / export)
+        |--------------------------------------------------------------------------
+        | Admins also have create/store/edit/update/destroy (registered above).
+        | Staff can browse the list, adjust stock quantities, view stock history,
+        | and export the CSV — matching the UI guards in inventory/index.blade.php.
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource('inventory', InventoryController::class, [
+            'only' => ['index', 'show'],
+        ]);
+
+        Route::put(
+            '/inventory/{inventory}/adjust',
+            [InventoryController::class, 'adjustStock']
+        )->name('inventory.adjust');
+
+        Route::get(
+            '/inventory-history',
+            [InventoryController::class, 'stockHistory']
+        )->name('inventory.history');
+
+        Route::get(
+            '/inventory-export',
+            [InventoryController::class, 'exportCsv']
+        )->name('inventory.export');
+
+
+        /*
+        |--------------------------------------------------------------------------
         | PATIENTS
         |--------------------------------------------------------------------------
         */
@@ -431,6 +452,16 @@ Route::middleware('check.login')->group(function () {
             '/appointments/{appointment}/complete',
             [AppointmentController::class, 'complete']
         )->name('appointments.complete');
+
+        Route::post(
+    '/appointments/{appointment}/approve',
+    [AppointmentController::class, 'approve']
+)->name('appointments.approve');
+
+Route::post(
+    '/appointments/{appointment}/reject',
+    [AppointmentController::class, 'reject']
+)->name('appointments.reject');
 
 
         /*

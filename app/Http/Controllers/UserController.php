@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -41,7 +42,7 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password, // model's 'hashed' cast hashes this automatically
+            'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
 
@@ -70,9 +71,8 @@ class UserController extends Controller
         ];
 
         // Only update password if user entered a new one
-        // (model's 'hashed' cast hashes this automatically)
         if (!empty($request->password)) {
-            $data['password'] = $request->password;
+            $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);

@@ -15,14 +15,22 @@ class Appointment extends Model
         'appointment_time',
         'doctor_name',
         'type',
+         'location',
         'status',
+        'message',
         'source',
     ];
 
+    protected $casts = [
+        'appointment_date' => 'date',
+        'appointment_time' => 'datetime:H:i',
+    ];
+
+    /**
+     * Appointment belongs to a patient.
+     */
     public function patient()
     {
-        return $this->belongsTo(
-            Patient::class
-        );
+        return $this->belongsTo(Patient::class);
     }
 }

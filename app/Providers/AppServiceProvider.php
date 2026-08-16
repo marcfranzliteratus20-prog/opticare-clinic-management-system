@@ -36,113 +36,42 @@ class AppServiceProvider extends ServiceProvider
 
         /*
         |--------------------------------------------------------------------------
-        | GLOBAL NOTIFICATIONS
+        | GLOBAL NOTIFICATIONS & BADGES
         |--------------------------------------------------------------------------
         */
 
         View::composer('*', function ($view) {
+            try {
+                $todayAppointments = Appointment::whereDate('appointment_date', today())->count();
+                $pendingAppointments = Appointment::where('status', 'Pending')->count();
+                $completedAppointments = Appointment::where('status', 'Completed')->count();
+                $lowStock = Inventory::whereColumn('quantity', '<=', 'reorder_level')->count();
+                $unpaidBilling = Billing::where('payment_status', 'Unpaid')->count();
 
-            /*
-            |--------------------------------------------------------------------------
-            | TODAY'S APPOINTMENTS
-            |--------------------------------------------------------------------------
-            */
+                $totalNotifications =
+                    $todayAppointments +
+                    $pendingAppointments +
+                    $lowStock +
+                    $unpaidBilling;
 
-            $todayAppointments = Appointment::whereDate(
-                'appointment_date',
-                now()->toDateString()
-            )->count();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PENDING APPOINTMENTS
-            |--------------------------------------------------------------------------
-            */
-
-            $pendingAppointments = Appointment::where(
-                'status',
-                'Pending'
-            )->count();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | COMPLETED APPOINTMENTS
-            |--------------------------------------------------------------------------
-            */
-
-            $completedAppointments = Appointment::where(
-                'status',
-                'Completed'
-            )->count();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | LOW STOCK
-            |--------------------------------------------------------------------------
-            */
-
-            $lowStock = Inventory::where(
-                'quantity',
-                '<=',
-                5
-            )->count();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | UNPAID BILLING
-            |--------------------------------------------------------------------------
-            */
-
-            $unpaidBilling = Billing::where(
-                'status',
-                'Unpaid'
-            )->count();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | TOTAL NOTIFICATIONS
-            |--------------------------------------------------------------------------
-            */
-
-            $totalNotifications =
-                $todayAppointments +
-                $pendingAppointments +
-                $lowStock +
-                $unpaidBilling;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SHARE VARIABLES
-            |--------------------------------------------------------------------------
-            */
-
-            $view->with([
-
-                'todayAppointments' =>
-                    $todayAppointments,
-
-                'pendingAppointments' =>
-                    $pendingAppointments,
-
-                'completedAppointments' =>
-                    $completedAppointments,
-
-                'lowStock' =>
-                    $lowStock,
-
-                'unpaidBilling' =>
-                    $unpaidBilling,
-
-                'totalNotifications' =>
-                    $totalNotifications,
-
-            ]);
+                $view->with([
+                    'todayAppointments'     => $todayAppointments,
+                    'pendingAppointments'   => $pendingAppointments,
+                    'completedAppointments' => $completedAppointments,
+                    'lowStock'              => $lowStock,
+                    'unpaidBilling'         => $unpaidBilling,
+                    'totalNotifications'    => $totalNotifications,
+                ]);
+            } catch (\Throwable $e) {
+                $view->with([
+                    'todayAppointments'     => 0,
+                    'pendingAppointments'   => 0,
+                    'completedAppointments' => 0,
+                    'lowStock'              => 0,
+                    'unpaidBilling'         => 0,
+                    'totalNotifications'    => 0,
+                ]);
+            }
         });
     }
 }

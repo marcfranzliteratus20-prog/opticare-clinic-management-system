@@ -123,6 +123,7 @@
         }
 
         .oc-badge-gold { background: rgba(201,138,62,0.15); color: var(--oc-amber-dark); }
+        .oc-badge-teal { background: rgba(27,75,79,0.15); color: var(--oc-teal); }
         .oc-badge-sage { background: rgba(63,125,92,0.15); color: var(--oc-sage); }
         .oc-badge-terracotta { background: rgba(193,83,58,0.15); color: var(--oc-terracotta); }
 
@@ -173,18 +174,31 @@
                     </thead>
                     <tbody>
                         @foreach($appointments as $appointment)
+                            @php
+                                $status = strtolower(trim((string) $appointment->status));
+                            @endphp
                             <tr>
-                                <td>{{ $appointment->appointment_date }}</td>
-                                <td>{{ $appointment->appointment_time }}</td>
+                                <td>{{ $appointment->appointment_date ? (is_a($appointment->appointment_date, \Carbon\CarbonInterface::class) ? $appointment->appointment_date->format('M d, Y') : $appointment->appointment_date) : '—' }}</td>
+                                <td>{{ $appointment->appointment_time ?? '—' }}</td>
                                 <td>{{ $appointment->type ?? 'New Checkup' }}</td>
-                                <td>{{ $appointment->doctor_name }}</td>
+                                <td>{{ $appointment->doctor_name ?? 'To be assigned' }}</td>
                                 <td>
-                                    @if($appointment->status == 'Pending')
+                                    @if($status === 'pending')
                                         <span class="oc-badge oc-badge-gold">Pending Confirmation</span>
-                                    @elseif($appointment->status == 'Completed')
+                                    @elseif($status === 'approved')
+                                        <span class="oc-badge oc-badge-teal">Approved</span>
+                                    @elseif($status === 'completed')
                                         <span class="oc-badge oc-badge-sage">Completed</span>
+                                    @elseif($status === 'cancelled' || $status === 'rejected')
+                                        <span class="oc-badge oc-badge-terracotta">{{ ucfirst($appointment->status) }}</span>
                                     @else
-                                        <span class="oc-badge oc-badge-terracotta">Cancelled</span>
+                                        <span class="oc-badge oc-badge-gold">{{ $appointment->status }}</span>
+                                    @endif
+
+                                    @if(!empty($appointment->message))
+                                        <div class="mt-1" style="font-size: 0.78rem; color: #6c757d;">
+                                            <i class="bi bi-info-circle me-1"></i>{{ $appointment->message }}
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

@@ -9,13 +9,21 @@ class Billing extends Model
 {
     use SoftDeletes;
 
+    /**
+     * `payment_status` is the canonical payment status field ('Paid' / 'Unpaid').
+     *
+     * The database also has a legacy `status` column (re-added by migration 2026_08_08)
+     * that is never read or written by any application code. It always stays on its
+     * default value 'Unpaid'. Do NOT add `status` to $fillable or use it in queries.
+     * All billing payment logic must use `payment_status`.
+     */
     protected $fillable = [
         'patient_id',
         'amount',
         'service_type',
         'warranty_months',
         'warranty_expiry',
-        'payment_status'
+        'payment_status',
     ];
 
     protected $casts = [

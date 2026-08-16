@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 'name'     => 'OptiCare Admin',
                 'email'    => 'admin@opticare.com',
                 'password' => Hash::make('admin123'), // Bagong password mo
+                'role'     => 'Admin',
             ]
         );
     }
