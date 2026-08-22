@@ -24,12 +24,12 @@
             </p>
         </div>
 
-        <a
-            href="{{ route('appointments.create') }}"
-            class="oc-btn oc-btn-primary"
-        >
+        <a href="{{ route('appointments.create') }}"
+           class="oc-btn oc-btn-primary">
+
             <i class="bi bi-plus-circle"></i>
             Add Appointment
+
         </a>
 
     </div>
@@ -110,10 +110,8 @@
 
         <div class="oc-card-body">
 
-            <form
-                action="{{ route('appointments.index') }}"
-                method="GET"
-            >
+            <form action="{{ route('appointments.index') }}"
+                  method="GET">
 
                 <div class="row g-2 align-items-center">
 
@@ -127,7 +125,7 @@
                                 type="text"
                                 name="search"
                                 value="{{ $search ?? request('search') }}"
-                                placeholder="Search patient, doctor, appointment type, status, location, source, or contact number..."
+                                placeholder="Search patient, contact, address, doctor, appointment type, status, or source..."
                             >
 
                         </div>
@@ -170,6 +168,10 @@
 
                 <table class="oc-table">
 
+                    {{-- =================================================
+                        TABLE HEADER
+                    ================================================== --}}
+
                     <thead>
 
                         <tr>
@@ -187,7 +189,7 @@
                             </th>
 
                             <th>
-                                Location
+                                Address
                             </th>
 
                             <th>
@@ -214,7 +216,7 @@
                                 Message
                             </th>
 
-                            <th class="text-center">
+                            <th>
                                 Action
                             </th>
 
@@ -222,6 +224,10 @@
 
                     </thead>
 
+
+                    {{-- =================================================
+                        TABLE BODY
+                    ================================================== --}}
 
                     <tbody>
 
@@ -271,18 +277,18 @@
 
 
                                 {{-- =================================================
-                                    LOCATION
+                                    PATIENT ADDRESS
                                 ================================================== --}}
 
                                 <td>
 
-                                    @if($appointment->location)
+                                    @if($appointment->patient && $appointment->patient->address)
 
-                                        <span class="appointment-location">
+                                        <span class="appointment-address" title="{{ $appointment->patient->address }}">
 
-                                            <i class="bi bi-geo-alt"></i>
+                                            <i class="bi bi-geo-alt-fill"></i>
 
-                                            {{ $appointment->location }}
+                                            {{ $appointment->patient->address }}
 
                                         </span>
 
@@ -490,9 +496,9 @@
 
                                     <div class="action-buttons">
 
-                                        {{-- =========================================
-                                            PENDING
-                                        ========================================== --}}
+                                        {{-- ================================
+                                            PENDING ACTIONS
+                                        ================================= --}}
 
                                         @if($appointment->status === 'Pending')
 
@@ -542,9 +548,9 @@
                                         @endif
 
 
-                                        {{-- =========================================
-                                            APPROVED
-                                        ========================================== --}}
+                                        {{-- ================================
+                                            APPROVED ACTION
+                                        ================================= --}}
 
                                         @if($appointment->status === 'Approved')
 
@@ -574,9 +580,9 @@
                                         @endif
 
 
-                                        {{-- =========================================
+                                        {{-- ================================
                                             EDIT
-                                        ========================================== --}}
+                                        ================================= --}}
 
                                         <a
                                             href="{{ route('appointments.edit', $appointment->id) }}"
@@ -592,9 +598,9 @@
                                         </a>
 
 
-                                        {{-- =========================================
+                                        {{-- ================================
                                             DELETE
-                                        ========================================== --}}
+                                        ================================= --}}
 
                                         <form
                                             action="{{ route('appointments.destroy', $appointment->id) }}"
@@ -626,7 +632,6 @@
                                 </td>
 
                             </tr>
-
 
                         @empty
 
@@ -666,9 +671,9 @@
         </div>
 
 
-        {{-- =====================================================
+        {{-- =========================================================
             PAGINATION
-        ====================================================== --}}
+        ========================================================== --}}
 
         @if($appointments->hasPages())
 
@@ -705,7 +710,6 @@
 
                 <div class="modal-content reject-modal">
 
-
                     {{-- MODAL HEADER --}}
 
                     <div class="modal-header">
@@ -720,13 +724,10 @@
                                 class="modal-title"
                                 id="rejectModalLabel{{ $appointment->id }}"
                             >
-
                                 Reject Appointment
-
                             </h5>
 
                         </div>
-
 
                         <button
                             type="button"
@@ -749,7 +750,6 @@
 
                         <div class="modal-body">
 
-
                             <div class="reject-info">
 
                                 <i class="bi bi-person-circle"></i>
@@ -764,11 +764,19 @@
 
                                     <small>
 
-                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
+                                        @if($appointment->appointment_date)
 
-                                        at
+                                            {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
 
-                                        {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') }}
+                                        @endif
+
+                                        @if($appointment->appointment_time)
+
+                                            at
+
+                                            {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') }}
+
+                                        @endif
 
                                     </small>
 
@@ -788,7 +796,6 @@
 
                                 </label>
 
-
                                 <textarea
                                     id="message{{ $appointment->id }}"
                                     name="message"
@@ -797,7 +804,6 @@
                                     placeholder="Enter the reason why this appointment is being rejected..."
                                     required
                                 ></textarea>
-
 
                                 <small class="text-muted">
 
@@ -823,7 +829,6 @@
                                 Cancel
 
                             </button>
-
 
                             <button
                                 type="submit"
@@ -855,10 +860,7 @@
     FONTS
 ============================================================= --}}
 
-<link
-    rel="preconnect"
-    href="https://fonts.bunny.net"
->
+<link rel="preconnect" href="https://fonts.bunny.net">
 
 <link
     href="https://fonts.bunny.net/css?family=fraunces:500,600,700|inter:400,500,600,700"
@@ -1188,10 +1190,10 @@
 
 
 /* ================================================================
-   LOCATION
+   PATIENT ADDRESS
 ================================================================ */
 
-.appointment-location {
+.appointment-address {
 
     display: inline-flex;
 
@@ -1201,14 +1203,22 @@
 
     color: #596B70;
 
+    max-width: 200px;
+
     white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 
 }
 
 
-.appointment-location i {
+.appointment-address i {
 
     color: var(--oc-gold);
+
+    flex-shrink: 0;
 
 }
 
@@ -1290,8 +1300,6 @@
 }
 
 
-/* PENDING */
-
 .oc-status-pending {
 
     background: rgba(201, 138, 62, 0.12);
@@ -1300,8 +1308,6 @@
 
 }
 
-
-/* APPROVED */
 
 .oc-status-approved {
 
@@ -1312,8 +1318,6 @@
 }
 
 
-/* COMPLETED */
-
 .oc-status-completed {
 
     background: rgba(46, 125, 91, 0.12);
@@ -1323,8 +1327,6 @@
 }
 
 
-/* CANCELLED */
-
 .oc-status-cancelled {
 
     background: rgba(193, 83, 58, 0.12);
@@ -1333,8 +1335,6 @@
 
 }
 
-
-/* DEFAULT */
 
 .oc-status-default {
 

@@ -29,8 +29,6 @@ class AppointmentController extends Controller
 
                         ->orWhere('type', 'like', "%{$search}%")
 
-                        ->orWhere('location', 'like', "%{$search}%")
-
                         ->orWhere('source', 'like', "%{$search}%")
 
                         ->orWhereHas('patient', function ($pq) use ($search) {
@@ -43,6 +41,12 @@ class AppointmentController extends Controller
 
                             ->orWhere(
                                 'contact_number',
+                                'like',
+                                "%{$search}%"
+                            )
+
+                            ->orWhere(
+                                'address',
                                 'like',
                                 "%{$search}%"
                             );
@@ -116,12 +120,6 @@ class AppointmentController extends Controller
                 'in:Comprehensive Eye Examination,Prescription Eyeglasses,Contact Lens Fitting and Assessment,Ishihara Color Vision Test,Eye Condition Certification,Eyewear Accessories,Eyewear Repair and Maintenance,Frame Fitting,Other',
             ],
 
-            'location' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
             'status' => [
                 'nullable',
                 'in:Pending,Approved,Completed,Cancelled',
@@ -151,9 +149,6 @@ class AppointmentController extends Controller
 
             'type' =>
                 $validated['type'],
-
-            'location' =>
-                $validated['location'],
 
             'status' =>
                 $validated['status'] ?? 'Pending',
@@ -233,12 +228,6 @@ class AppointmentController extends Controller
                 'in:Comprehensive Eye Examination,Prescription Eyeglasses,Contact Lens Fitting and Assessment,Ishihara Color Vision Test,Eye Condition Certification,Eyewear Accessories,Eyewear Repair and Maintenance,Frame Fitting,Other',
             ],
 
-            'location' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
             'status' => [
                 'required',
                 'in:Pending,Approved,Completed,Cancelled',
@@ -268,9 +257,6 @@ class AppointmentController extends Controller
 
             'type' =>
                 $validated['type'],
-
-            'location' =>
-                $validated['location'],
 
             'status' =>
                 $validated['status'],

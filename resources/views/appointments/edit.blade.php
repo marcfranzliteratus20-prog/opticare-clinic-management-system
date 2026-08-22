@@ -201,30 +201,6 @@
                 </div>
 
 
-                {{-- =================================================
-                    LOCATION
-                ================================================== --}}
-
-                <div class="oc-field">
-
-                    <label for="location">
-                        Location
-                    </label>
-
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        placeholder="Enter appointment location"
-                        value="{{ old('location', $appointment->location) }}"
-                        required
-                    >
-
-                    <small class="oc-help">
-                        Enter the clinic location where the appointment will take place.
-                    </small>
-
-                </div>
 
 
                 {{-- =================================================

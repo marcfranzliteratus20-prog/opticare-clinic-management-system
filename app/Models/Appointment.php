@@ -15,7 +15,6 @@ class Appointment extends Model
         'appointment_time',
         'doctor_name',
         'type',
-         'location',
         'status',
         'message',
         'source',
