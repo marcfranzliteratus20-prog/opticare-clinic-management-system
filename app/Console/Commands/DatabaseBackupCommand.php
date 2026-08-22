@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\BackupController;
+use App\Services\BackupService;
 
 class DatabaseBackupCommand extends Command
 {
@@ -11,14 +11,18 @@ class DatabaseBackupCommand extends Command
 
     protected $description = 'Create automatic database backup';
 
-    public function handle()
+    public function handle(BackupService $backupService): int
     {
-        $controller = new BackupController();
+        $this->info('Starting database backup...');
 
-        $controller->create();
+        $result = $backupService->createBackup();
 
-        $this->info('Automatic backup completed.');
+        if ($result['success']) {
+            $this->info('Automatic backup completed successfully: ' . ($result['filename'] ?? ''));
+            return Command::SUCCESS;
+        }
 
-        return Command::SUCCESS;
+        $this->error('Automatic backup failed: ' . ($result['message'] ?? 'Unknown error'));
+        return Command::FAILURE;
     }
 }

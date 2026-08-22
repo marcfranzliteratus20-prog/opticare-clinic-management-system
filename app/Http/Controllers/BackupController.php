@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\BackupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class BackupController extends Controller
 {
-    private const BACKUP_DIR = 'backups';
+    private const BACKUP_DIR = BackupService::BACKUP_DIR;
+
+    public function __construct(
+        protected BackupService $backupService
+    ) {}
 
     public function index()
     {
@@ -31,65 +36,16 @@ class BackupController extends Controller
 
     public function create()
     {
-        $disk = Storage::disk('local');
-        $disk->makeDirectory(self::BACKUP_DIR);
+        $result = $this->backupService->createBackup();
 
-        $filename = 'opticare-backup-' . now()->format('Y-m-d_His') . '.sql';
-        $fullPath = $disk->path(self::BACKUP_DIR . '/' . $filename);
-
-        $driver = DB::connection()->getDriverName();
-
-        $command = $driver === 'pgsql'
-            ? $this->buildPgDumpCommand($fullPath)
-            : $this->buildMysqldumpCommand($fullPath);
-
-        exec($command . ' 2>&1', $output, $resultCode);
-
-        if ($resultCode !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
-
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
-            }
-
-            return back()->with('error', implode("\n", $output));
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
         }
 
-        return back()->with('success', 'Backup created successfully.');
+        return back()->with('success', $result['message']);
     }
 
-    private function buildMysqldumpCommand(string $fullPath): string
-    {
-        $db = config('database.connections.mysql');
-
-        return sprintf(
-            '%s --user=%s --password=%s --host=%s %s > %s',
-            escapeshellcmd(env('MYSQLDUMP_PATH', 'mysqldump')),
-            escapeshellarg($db['username']),
-            escapeshellarg($db['password']),
-            escapeshellarg($db['host']),
-            escapeshellarg($db['database']),
-            escapeshellarg($fullPath)
-        );
-    }
-
-    private function buildPgDumpCommand(string $fullPath): string
-    {
-        $db = config('database.connections.pgsql');
-
-        putenv("PGPASSWORD={$db['password']}");
-
-        return sprintf(
-            '%s -h %s -p %s -U %s -F p -d %s -f %s',
-            escapeshellcmd(env('PGDUMP_PATH', '/usr/lib/postgresql/18/bin/pg_dump')),
-            escapeshellarg($db['host']),
-            escapeshellarg($db['port']),
-            escapeshellarg($db['username']),
-            escapeshellarg($db['database']),
-            escapeshellarg($fullPath)
-        );
-    }
-
-        /**
+    /**
      * Download Backup
      */
     public function download(string $filename)
@@ -150,15 +106,15 @@ class BackupController extends Controller
 
             $db = config('database.connections.pgsql');
 
-            putenv("PGPASSWORD={$db['password']}");
+            putenv("PGPASSWORD=" . ($db['password'] ?? ''));
 
             $command = sprintf(
                 '%s -h %s -p %s -U %s -d %s -f %s',
                 escapeshellcmd(env('PSQL_PATH', '/usr/lib/postgresql/18/bin/psql')),
-                escapeshellarg($db['host']),
-                escapeshellarg($db['port']),
-                escapeshellarg($db['username']),
-                escapeshellarg($db['database']),
+                escapeshellarg($db['host'] ?? '127.0.0.1'),
+                escapeshellarg($db['port'] ?? '5432'),
+                escapeshellarg($db['username'] ?? 'postgres'),
+                escapeshellarg($db['database'] ?? 'opticare'),
                 escapeshellarg($fullPath)
             );
 
@@ -169,9 +125,9 @@ class BackupController extends Controller
             $command = sprintf(
                 '%s --user=%s --password=%s %s < %s',
                 escapeshellcmd(env('MYSQL_PATH', 'mysql')),
-                escapeshellarg($db['username']),
-                escapeshellarg($db['password']),
-                escapeshellarg($db['database']),
+                escapeshellarg($db['username'] ?? 'root'),
+                escapeshellarg($db['password'] ?? ''),
+                escapeshellarg($db['database'] ?? 'opticare'),
                 escapeshellarg($fullPath)
             );
         }
@@ -192,7 +148,9 @@ class BackupController extends Controller
      */
     public function schedule()
     {
-        return view('backup.schedule');
+        $schedule = $this->backupService->getSchedule();
+
+        return view('backup.schedule', compact('schedule'));
     }
 
     /**
@@ -200,9 +158,20 @@ class BackupController extends Controller
      */
     public function saveSchedule(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'frequency' => 'required|in:daily,weekly,monthly',
-            'time' => 'required'
+            'time' => 'required',
+            'enabled' => 'nullable',
+        ]);
+
+        $enabled = $request->has('enabled')
+            ? filter_var($request->input('enabled'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true
+            : false;
+
+        $this->backupService->saveSchedule([
+            'enabled' => $enabled,
+            'frequency' => $validated['frequency'],
+            'time' => $validated['time'],
         ]);
 
         return redirect()

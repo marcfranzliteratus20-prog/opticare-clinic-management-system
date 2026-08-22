@@ -24,7 +24,7 @@ class BookingController extends Controller
 
             'type' => [
                 'required',
-                'in:Comprehensive Eye Examination,Prescription Eyeglasses,Contact Lens Fitting and Assessment,Ishihara Color Vision Test,Eye Condition Certification,Eyewear Accessories,Eyewear Repair and Maintenance,Other',
+                'in:Comprehensive Eye Examination,Prescription Eyeglasses,Contact Lens Fitting and Assessment,Ishihara Color Vision Test,Eye Condition Certification,Eyewear Accessories,Eyewear Repair and Maintenance,Frame Fitting,Other',
             ],
 
             'appointment_date' => 'required|date|after_or_equal:today',

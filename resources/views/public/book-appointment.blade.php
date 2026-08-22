@@ -361,6 +361,10 @@
             Eyewear Repair and Maintenance
         </option>
 
+        <option value="Frame Fitting" {{ old('type') == 'Frame Fitting' ? 'selected' : '' }}>
+            Frame Fitting
+        </option>
+
         <option value="Other" {{ old('type') == 'Other' ? 'selected' : '' }}>
             Other
         </option>
